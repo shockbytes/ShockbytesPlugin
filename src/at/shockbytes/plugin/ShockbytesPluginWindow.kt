@@ -11,8 +11,8 @@ import javax.swing.BorderFactory
 import javax.swing.UIManager
 
 /**
- * Author: Martin Macheiner
- * Date: 22.03.2016.
+ * Author:  Martin Macheiner
+ * Date:    22.03.2016.
  */
 class ShockbytesPluginWindow : ToolWindowFactory {
 
@@ -38,9 +38,7 @@ class ShockbytesPluginWindow : ToolWindowFactory {
     }
 
     private fun createTabs(container: Container) {
-        worker.forEach { w ->
-            tabbedPane.addTab(w.title, w.icon, w.tabPanel)
-        }
+        worker.forEach { w -> tabbedPane.addTab(w.title, w.icon, w.tabPanel) }
         container.add(tabbedPane)
     }
 

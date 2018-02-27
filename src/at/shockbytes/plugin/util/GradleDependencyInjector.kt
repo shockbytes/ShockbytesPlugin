@@ -195,7 +195,7 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
     }
 
     private fun injectRepositoryStatement(statement: String) {
-        // TODO
+        // TODO Inject repository into build.gradle file
     }
 
     private fun injectAppStatement(statement: String, position: InsertionPosition) {
