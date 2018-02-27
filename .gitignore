@@ -31,7 +31,7 @@ captures/
 # Deployment artifact
 plugin.zip
 
-# Sensible resources
+# Sensitive resources
 resources/fcm_api_key.txt
 resources/client_secret.json
 resources/workspace_location.txt
