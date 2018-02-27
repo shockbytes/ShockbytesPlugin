@@ -1,0 +1,329 @@
+{
+  "dependencies": [
+    {
+      "title": "AppCompat Support library",
+      "statement": "implementation \"com.android.support:appcompat-v7:_VERSION_\"",
+      "version": "26.0.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Support library v4",
+      "statement": "implementation \"com.android.support:support-v4:_VERSION_\"",
+      "version": "26.0.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Design Support library",
+      "statement": "implementation \"com.android.support:design:_VERSION_\"",
+      "version": "26.0.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "CardView Support library",
+      "statement": "implementation \"com.android.support:cardview-v7:_VERSION_\"",
+      "version": "26.0.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Palette Support library",
+      "statement": "implementation \"com.android.support:palette-v7:_VERSION_\"",
+      "version": "26.0.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Google Fit",
+      "statement": "implementation \"com.google.android.gms:play-services-fitness:_VERSION_\"",
+      "version": "11.2.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Vision Play Services",
+      "statement": "implementation \"com.google.android.gms:play-services-vision:_VERSION_\"",
+      "version": "11.2.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Google Drive",
+      "statement": "implementation \"com.google.android.gms:play-services-drive:_VERSION_\"",
+      "version": "11.2.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Shockbytes ShockUtil",
+      "statement": "implementation \"com.github.shockbytes:ShockUtil:_VERSION_\"",
+      "version": "2.1.0",
+      "query": "com.github.shockbytes/ShockUtil",
+      "endpoint": "jitpack_io"
+    },
+    {
+      "title": "Google Guava",
+      "statement": "implementation \"com.google.guava:guava:_VERSION_\"",
+      "version": "24.0-android",
+      "query": "g:com.google.guava+AND+a:guava",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Google Gson",
+      "statement": "implementation \"com.google.code.gson:gson:_VERSION_\"",
+      "version": "2.8.2",
+      "query": "g:com.google.code.gson+AND+a:gson",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "ButterKnife",
+      "statement": "implementation \"com.jakewharton:butterknife:_VERSION_\"\nkapt \"com.jakewharton:butterknife-compiler:_VERSION_\"",
+      "version": "8.8.1",
+      "query": "g:com.jakewharton+AND+a:butterknife",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Joda Time",
+      "statement": "implementation \"net.danlew:android.joda:_VERSION_\"",
+      "version": "2.9.9.2",
+      "query": "g:net.danlew+AND+a:android.joda",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "RxJava2",
+      "statement": "implementation \"io.reactivex.rxjava2:rxjava:_VERSION_\"",
+      "version": "2.1.10",
+      "query": "g:io.reactivex.rxjava2+AND+a:rxjava",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "RxAndroid2",
+      "statement": "implementation \"io.reactivex.rxjava2:rxandroid:_VERSION_\"",
+      "version": "2.0.2",
+      "query": "g:io.reactivex.rxjava2+AND+a:rxandroid",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Picasso",
+      "statement": "implementation \"com.squareup.picasso:picasso:_VERSION_\"",
+      "version": "2.5.2",
+      "query": "g:com.squareup.picasso+AND+a:picasso",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Firebase Core",
+      "statement": "implementation \"com.google.firebase:firebase-core:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Realtime Database",
+      "statement": "implementation \"com.google.firebase:firebase-database:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Storage",
+      "statement": "implementation \"com.google.firebase:firebase-storage:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Crash Reporting",
+      "statement": "implementation \"com.google.firebase:firebase-crash:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Authentication",
+      "statement": "implementation \"com.google.firebase:firebase-auth:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Cloud Messaging and Notifications",
+      "statement": "implementation \"com.google.firebase:firebase-messaging:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Remote Config",
+      "statement": "implementation \"com.google.firebase:firebase-config:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase Invites and Dynamic Links",
+      "statement": "implementation \"com.google.firebase:firebase-invites:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase AdMob",
+      "statement": "implementation \"com.google.firebase:firebase-ads:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase App Indexing",
+      "statement": "implementation \"com.google.firebase:firebase-appindexing:_VERSION_\"",
+      "version": "11.8.0",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Firebase UI Auth",
+      "statement": "implementation \"com.firebaseui:firebase-ui-auth:_VERSION_\"",
+      "version": "3.2.1",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
+      "title": "Keen IO",
+      "statement": "implementation \"io.keen:keen-client-api-android:_VERSION_@aar\"",
+      "version": "5.2.0",
+      "query": "g:io.keen+AND+a:keen-client-api-android",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Timber",
+      "statement": "implementation \"com.jakewharton.timber:timber:_VERSION_\"",
+      "version": "4.6.1",
+      "query": "g:com.jakewharton.timber+AND+a:timber",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "MPAndroidChart",
+      "statement": "implementation \"com.github.PhilJay:MPAndroidChart:_VERSION_\"",
+      "version": "v3.0.3",
+      "query": "com.github.PhilJay/MPAndroidChart",
+      "endpoint": "jitpack_io"
+    },
+    {
+      "title": "IcePick",
+      "statement": "implementation \"frankiesardo:icepick:_VERSION_\"\nkapt \"frankiesardo:icepick-processor:_VERSION_\"",
+      "version": "3.2.0",
+      "query": "frankiesardo/icepick",
+      "endpoint": "clojars"
+    }
+  ],
+  "repositories": [
+    {
+      "title": "Jitpack.io",
+      "statement": "maven { url \"https://jitpack.io\" }"
+    },
+    {
+      "title": "Maven Central",
+      "statement": "mavenCentral()"
+    },
+    {
+      "title": "Google",
+      "statement": "google()"
+    },
+    {
+      "title": "Fabric",
+      "statement": "maven { url \"https://maven.fabric.io/public\" }"
+    },
+    {
+      "title": "Clojars",
+      "statement": "maven { url \"https://clojars.org/repo/\" }"
+    }, {
+      "title": "Sonatype Snapshot",
+      "statement": "maven { url \"https://oss.sonatype.org/content/repositories/snapshots\" }"
+    }
+  ],
+  "plugins": [
+    {
+      "title": "Realm",
+      "statement": "classpath \"io.realm:realm-gradle-plugin:_VERSION_\"",
+      "version": "4.3.4",
+      "applyTop": true,
+      "applyName": "apply plugin: \"realm-android\""
+    },
+    {
+      "title": "Google Play Services",
+      "statement": "classpath \"com.google.gms:google-services:_VERSION_\"",
+      "version": "3.2.0",
+      "applyTop": false,
+      "applyName": "apply plugin: \"com.google.gms.google-services\""
+    }
+  ],
+  "dagger": [
+    {
+      "title": "Dagger Android",
+      "statement": "implementation \"com.google.dagger:dagger-android:_VERSION_\"",
+      "version": "2.14.1",
+      "query": "g:com.google.dagger+AND+a:dagger",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Dagger Android Support",
+      "statement": "implementation \"com.google.dagger:dagger-android-support:_VERSION_\"",
+      "version": "2.14.1",
+      "query": "g:com.google.dagger+AND+a:dagger",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Dagger Android AnnotationProcessor",
+      "statement": "kapt \"com.google.dagger:dagger-android-processor:_VERSION_\"",
+      "version": "2.14.1",
+      "query": "g:com.google.dagger+AND+a:dagger",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Dagger",
+      "statement": "implementation \"com.google.dagger:dagger:_VERSION_\"",
+      "version": "2.14.1",
+      "query": "g:com.google.dagger+AND+a:dagger",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Dagger AnnotationProcessor",
+      "statement": "kapt \"com.google.dagger:dagger-compiler:_VERSION_\"",
+      "version": "2.14.1",
+      "query": "g:com.google.dagger+AND+a:dagger",
+      "endpoint": "maven_central"
+    }
+  ],
+  "retrofit": [
+    {
+      "title": "Retrofit",
+      "statement": "implementation \"com.squareup.retrofit2:retrofit:_VERSION_\"",
+      "version": "2.3.0",
+      "query": "g:com.squareup.retrofit2+AND+a:retrofit",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Retrofit Gson Converter",
+      "statement": "implementation \"com.squareup.retrofit2:converter-gson:_VERSION_\"",
+      "version": "2.3.0",
+      "query": "g:com.squareup.retrofit2+AND+a:converter-gson",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "Retrofit RxJava Adapter",
+      "statement": "implementation \"com.squareup.retrofit2:adapter-rxjava:_VERSION_\"",
+      "version": "2.3.0",
+      "query": "g:com.squareup.retrofit2+AND+a:adapter-rxjava",
+      "endpoint": "maven_central"
+    },
+    {
+      "title": "OkHttp Logging Interceptor",
+      "statement": "implementation \"com.squareup.okhttp3:logging-interceptor:_VERSION_\"",
+      "version": "3.10.0",
+      "query": "g:com.squareup.okhttp3+AND+a:logging-interceptor",
+      "endpoint": "maven_central"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+
+# Generated files
+bin/
+gen/
+out/
+target/
+
+# Gradle files
+.gradle/
+build/
+
+# Config files
+data/config.json
+data/serial_driver/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+.log
+
+# Android Studio captures folder
+captures/
+
+# Intellij
+*.iml
+.idea
+
+# Keystore files
+*.jks
+
+# Deployment artifact
+plugin.zip
+
+# Sensible resources
+resources/fcm_api_key.txt
+resources/client_secret.json
+resources/workspace_location.txt
+resources/custom_certificate.json
+resources/firebase_service_account_key.json
+
