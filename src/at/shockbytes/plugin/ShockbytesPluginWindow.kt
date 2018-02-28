@@ -34,7 +34,8 @@ class ShockbytesPluginWindow : ToolWindowFactory {
         worker = listOf(AndroidWorker(),
                 WorkspaceCrawlerWorker(),
                 GradleWorker(),
-                ScreenCaptureHelper())
+                ScreenCaptureHelper(),
+                PlayStoreWorker())
     }
 
     private fun createTabs(container: Container) {

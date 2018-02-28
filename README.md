@@ -2,10 +2,14 @@
 
 ## Versions
 
+### 3.2
+-[ ] Supply/Fastlane support via PlayStoreWorker
+
 ### 3.1
 -[ ] Changer dagger generated classes to Kotlin
 -[ ] Resolve Google dependencies
 -[ ] Store updated dependencies in gradle_dependencies.json
+-[ ] Screengrab support
 
 ### 3.0
 * Android Utilities
