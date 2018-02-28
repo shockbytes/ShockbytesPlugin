@@ -34,6 +34,7 @@ plugin.zip
 # Sensitive resources
 resources/fcm_api_key.txt
 resources/client_secret.json
+resources/google_play_key.json
 resources/workspace_location.txt
 resources/custom_certificate.json
 resources/firebase_service_account_key.json

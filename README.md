@@ -10,15 +10,13 @@
 -[ ] Resolve Google dependencies
 -[ ] Store updated dependencies in gradle_dependencies.json
 -[ ] Screengrab support
+-[ ] Show current version somewhere
 
 ### 3.0
 * Android Utilities
 * Workspace Crawler
 * Android Screen Capturing
 * Android Gradle dependency management
-
-## Open points
-* Resolve dependencies from Google's maven repository
 
 ## Troubleshooting
 
