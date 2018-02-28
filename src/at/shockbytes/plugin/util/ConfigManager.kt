@@ -8,7 +8,9 @@ import com.google.gson.JsonParser
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.apache.commons.io.IOUtils
+import java.io.File
 import java.io.InputStream
+import java.io.PrintWriter
 
 /**
  * Author:  Martin Macheiner
@@ -53,9 +55,9 @@ object ConfigManager {
             jsonObject.add("dependencies", deps)
 
             val formatted = gson.toJson(jsonObject)
-            println(formatted)
-
-            // TODO Store it
+            PrintWriter(File(javaClass.getResource("/gradle_dependencies.json").path)).use { writer ->
+                writer.print(formatted)
+            }
 
         }.subscribeOn(Schedulers.io())
     }

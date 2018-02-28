@@ -6,9 +6,9 @@
 - [ ] Supply/Fastlane support via PlayStoreWorker
 
 ### 3.1
-- [ ] Changer dagger generated classes to Kotlin
+- [x] Store updated dependencies in gradle_dependencies.json
+- [x] Changer dagger generated classes to Kotlin
 - [ ] Resolve Google dependencies
-- [ ] Store updated dependencies in gradle_dependencies.json
 - [ ] Screengrab support
 - [ ] Show current version somewhere
 
