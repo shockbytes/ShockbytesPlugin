@@ -1,6 +1,5 @@
 package at.shockbytes.plugin.util
 
-import at.shockbytes.plugin.model.RecordTimeState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.apache.commons.io.IOUtils
@@ -9,7 +8,7 @@ import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import java.util.function.BiPredicate
 import java.util.stream.Collectors
 
@@ -86,24 +85,6 @@ object HelperUtil {
             }
         }
         return sb.toString()
-    }
-
-    fun exportTimeRecording(path: String, project: RecordTimeState.Project) {
-
-        try {
-
-            val writer = PrintWriter(BufferedWriter(FileWriter(path)))
-            writer.println(project.name + "; " + project.workingHours + "h\n")
-            for (entry in project.records) {
-                writer.println(entry.minutes.toString() + "min; " + formatDate(entry.start) + "; "
-                        + formatTime(entry.start) + " - " + formatTime(entry.end))
-            }
-            writer.close()
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
     }
 
     fun getPackagesFromProject(project: Project): List<String> {

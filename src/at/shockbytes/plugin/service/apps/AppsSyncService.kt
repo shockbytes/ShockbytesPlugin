@@ -4,7 +4,7 @@ import at.shockbytes.plugin.model.AppsSyncState
 import at.shockbytes.plugin.service.push.GooglePushService
 import at.shockbytes.plugin.service.push.PushService
 import at.shockbytes.plugin.util.HelperUtil
-import at.shockbytes.plugin.util.ShockConfig
+import at.shockbytes.plugin.util.ConfigManager
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
@@ -34,7 +34,7 @@ class AppsSyncService(private val project: Project) {
     private val pushManager: PushService
 
     init {
-        pushManager = GooglePushService(ShockConfig.loadFCMApiKey())
+        pushManager = GooglePushService(ConfigManager.loadFCMApiKey())
         initializeAppsSyncState()
     }
 

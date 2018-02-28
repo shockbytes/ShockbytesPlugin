@@ -2,8 +2,8 @@ package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.model.CertificateParams
 import at.shockbytes.plugin.service.apps.AppsSyncService
+import at.shockbytes.plugin.util.ConfigManager
 import at.shockbytes.plugin.util.HelperUtil
-import at.shockbytes.plugin.util.ShockConfig
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.components.JBScrollPane
@@ -254,7 +254,7 @@ class AndroidWorker : Worker(), ActionListener {
 
         var certParams: CertificateParams? = null
         val certInfo = try {
-            certParams = ShockConfig.loadCustomCertificate()
+            certParams = ConfigManager.loadCustomCertificate()
             grabCertificateInformation(certParams.keyStorePath, certParams.alias,
                     certParams.keyStorePassword, certParams.entryPassword, false)
         } catch (e: Exception) {

@@ -2,16 +2,14 @@
   <id>at.shockbytes.plugin</id>
   <name>Shockbytes Plugin</name>
   <version>3.0</version>
-  <vendor email="shockbytesstudio@gmail.com" url="http://www.yourcompany.com">Shockbytes Studio</vendor>
+  <vendor email="shockbytesstudio@gmail.com" url="https://http://shockbytes.github.io/">Shockbytes Studio</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      Shockbytes Personal convenience plugin
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+      Now fully written in Kotlin with reduced, but improved features
     ]]>
   </change-notes>
 
@@ -26,7 +24,6 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
-    <applicationService serviceImplementation="at.shockbytes.plugin.model.RecordTimeState" />
     <applicationService serviceImplementation="at.shockbytes.plugin.model.AppsSyncState" />
     <toolWindow id="Shockbytes" icon="/icons/plugin_logo.png" anchor="bottom" factoryClass="at.shockbytes.plugin.ShockbytesPluginWindow"/>
   </extensions>

@@ -36,6 +36,13 @@
       "endpoint": "google"
     },
     {
+      "title": "Android ktx",
+      "statement": "implementation \"androidx.core:core-ktx:_VERSION_\"",
+      "version": "0.1",
+      "query": "TODO",
+      "endpoint": "google"
+    },
+    {
       "title": "Google Fit",
       "statement": "implementation \"com.google.android.gms:play-services-fitness:_VERSION_\"",
       "version": "11.2.0",
@@ -79,7 +86,7 @@
     },
     {
       "title": "ButterKnife",
-      "statement": "implementation \"com.jakewharton:butterknife:_VERSION_\"\nkapt \"com.jakewharton:butterknife-compiler:_VERSION_\"",
+      "statement": "implementation \"com.jakewharton:butterknife:_VERSION_\"\n\tkapt \"com.jakewharton:butterknife-compiler:_VERSION_\"",
       "version": "8.8.1",
       "query": "g:com.jakewharton+AND+a:butterknife",
       "endpoint": "maven_central"
@@ -212,7 +219,7 @@
     },
     {
       "title": "IcePick",
-      "statement": "implementation \"frankiesardo:icepick:_VERSION_\"\nkapt \"frankiesardo:icepick-processor:_VERSION_\"",
+      "statement": "implementation \"frankiesardo:icepick:_VERSION_\"\n\tkapt \"frankiesardo:icepick-processor:_VERSION_\"",
       "version": "3.2.0",
       "query": "frankiesardo/icepick",
       "endpoint": "clojars"
@@ -221,7 +228,7 @@
   "repositories": [
     {
       "title": "Jitpack.io",
-      "statement": "maven { url \"https://jitpack.io\" }"
+      "statement": "maven { url 'https://jitpack.io' }"
     },
     {
       "title": "Maven Central",
@@ -233,14 +240,19 @@
     },
     {
       "title": "Fabric",
-      "statement": "maven { url \"https://maven.fabric.io/public\" }"
+      "statement": "maven { url 'https://maven.fabric.io/public' }"
     },
     {
       "title": "Clojars",
-      "statement": "maven { url \"https://clojars.org/repo/\" }"
-    }, {
+      "statement": "maven { url 'https://clojars.org/repo' }"
+    },
+    {
       "title": "Sonatype Snapshot",
-      "statement": "maven { url \"https://oss.sonatype.org/content/repositories/snapshots\" }"
+      "statement": "maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }"
+    },
+    {
+      "title": "JCenter",
+      "statement": "jcenter()"
     }
   ],
   "plugins": [

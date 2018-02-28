@@ -1,7 +1,7 @@
 package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.util.HelperUtil
-import at.shockbytes.plugin.util.ShockConfig
+import at.shockbytes.plugin.util.ConfigManager
 import at.shockbytes.plugin.view.MaterialListCellRenderer
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
@@ -38,7 +38,7 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
     private lateinit var labelStatus: JLabel
     private lateinit var searchList: JBList<String>
 
-    private val workspaceDirectory = ShockConfig.loadWorkspaceLocation()
+    private val workspaceDirectory = ConfigManager.loadWorkspaceLocation()
 
     override val title = "Workspace Crawler"
     override val icon = IconLoader.getIcon("/icons/tab_workspace_crawler.png")

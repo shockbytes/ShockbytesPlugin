@@ -16,7 +16,7 @@ class DependencyResolverTest {
     }
 
     @Test
-    fun mavenCentralResolveTest() {
+    fun testMavenCentralResolver() {
 
         val dep = GradleDependency("Google Gson", "implementation 'com.google.code.gson:gson:_VERSION_'",
                 "", "g:com.google.code.gson+AND+a:gson", GradleDependency.EndPoint.MAVEN_CENTRAL)
@@ -26,7 +26,7 @@ class DependencyResolverTest {
     }
 
     @Test
-    fun jitpackIoResolveTest() {
+    fun testJitpackIoResolver() {
 
         val dep = GradleDependency("Shockbytes ShockUtil", "implementation 'com.github.shockbytes:ShockUtil:_VERSION_'",
                 "", "com.github.shockbytes/ShockUtil", GradleDependency.EndPoint.JITPACK_IO)
@@ -36,7 +36,7 @@ class DependencyResolverTest {
     }
 
     @Test
-    fun clojarsResolveTest() {
+    fun testClojarsResolver() {
 
         val dep = GradleDependency("Icepick", "implementation \"frankiesardo:icepick:_VERSION_\"",
                 "", "frankiesardo/icepick", GradleDependency.EndPoint.CLOJARS)
@@ -47,7 +47,7 @@ class DependencyResolverTest {
     }
 
     @Test
-    fun replaceVersionTest() {
+    fun testReplaceVersion() {
 
         val t = "implementation 'com.google.android.gms:play-services-drive:_VERSION_'"
         val replaced = t.replace("_VERSION_", "11.2.0")
@@ -56,7 +56,7 @@ class DependencyResolverTest {
     }
 
     @Test
-    fun replaceMultiLineVersionTest() {
+    fun testReplaceMultiLineVersion() {
 
         val t = "implementation 'frankiesardo:icepick:_VERSION_'\nkapt 'frankiesardo:icepick-processor:_VERSION_'"
         val replaced = t.replace("_VERSION_", "3.2.0")

@@ -18,18 +18,15 @@ import io.reactivex.Observable
 import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.stream.Collectors
 
 /**
  * Author:  Mescht
  * Date:    21.02.2017
  */
-class GradleDependencyInjector(private val project: Project, rootFolder: String) {
+class GradleDependencyInjector(private val project: Project, rootFolder: String,
+                               loadStatements: Boolean = true) {
 
     private val projectName: String = project.name
 
@@ -39,10 +36,10 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
     private var manifestFile: String? = null
 
     private var gradleStatements: MutableList<GradleDependency> = mutableListOf()
-    private var pluginStatements: MutableList<GradlePluginStatement> = mutableListOf()
-    private var daggerStatements: MutableList<GradleDependency> = mutableListOf()
-    private var retrofitStatements: MutableList<GradleDependency> = mutableListOf()
-    private var repositories: MutableList<GradleRepository> = mutableListOf()
+    private var pluginStatements: List<GradlePluginStatement> = listOf()
+    private var daggerStatements: List<GradleDependency> = listOf()
+    private var retrofitStatements: List<GradleDependency> = listOf()
+    private var repositories: List<GradleRepository> = listOf()
 
     private var depsResolveService: GradleDependencyResolveService = GradleDependencyResolveService()
 
@@ -61,13 +58,21 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
                 .map { it.title }
                 .toTypedArray()
 
-    private enum class InsertionPosition {
+    private enum class AppGradlePosition {
         DEPENDENCY, TOP, BOTTOM
+    }
+
+    private enum class ProjectGradlePosition {
+        PLUGIN, REPOSITORY
     }
 
     init {
         grabImportantProjectFiles(rootFolder)
-        loadGradleStatements()
+
+        // Disable for testing
+        if (loadStatements) {
+            loadGradleStatements()
+        }
     }
 
     // --------------------------------------------------------------------------------
@@ -90,10 +95,9 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
         injectDependencyStatements(retrofitStatements)
     }
 
-
     fun injectRepository(repoIndex: Int) {
         val repo = repositories[repoIndex]
-        injectRepositoryStatement("\n\t" + repo.statement)
+        injectRepositoryStatement("\n\t\t" + repo.statement)
     }
 
     fun updateDependencyVersions(onError: Consumer<Throwable>, onComplete: Action) {
@@ -104,7 +108,13 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
                     it.mapTo(gradleStatements) { it as GradleDependency }
                 }, false, 20)
                 .subscribeOn(Schedulers.io())
-                .subscribe(Consumer { }, onError, onComplete)
+                .subscribe(Consumer {
+                    ConfigManager.storeGradleDependencies(it).subscribe { println("Dependency file updated!") }
+                }, onError, onComplete)
+    }
+
+    fun verifyFiles(): Boolean {
+        return projectGradleFile != null && appGradleFile != null && mainActivityFile != null && manifestFile != null
     }
 
     // --------------------------------------------------------------------------------
@@ -145,31 +155,22 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
 
     private fun grabImportantProjectFiles(rootFolder: String) {
 
-        try {
-            val files = Files.walk(Paths.get(rootFolder))
-                    .parallel()
-                    .filter { path ->
-                        val filename = path.fileName.toString()
-                        (filename == "build.dependency" || filename == "MainActivity.java"
-                                || filename == "AndroidManifest.xml")
-                    }
-                    .map { p -> p.toAbsolutePath().toString() }
-                    .collect(Collectors.toList())
-
-            files.forEach { s ->
-                val filename = Paths.get(s).parent.fileName.toString()
-                when {
-                    filename.equals(projectName, ignoreCase = true) -> projectGradleFile = s
-                    filename.equals("app", ignoreCase = true) -> appGradleFile = s
-                    s.endsWith("MainActivity.java") -> mainActivityFile = s
-                    s.endsWith("AndroidManifest.xml") -> manifestFile = s
+        File(rootFolder).walk()
+                .filter {
+                    !it.absolutePath.contains("build\\intermediates")
+                            && (it.name == "build.gradle" || it.name == "MainActivity.java" || it.name == "AndroidManifest.xml")
                 }
-            }
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
+                .forEach {
+                    val filename = it.name
+                    val path = it.absolutePath
+                    val parent = it.parentFile.name
+                    when {
+                        filename == "MainActivity.java" -> mainActivityFile = path
+                        filename == "AndroidManifest.xml" -> manifestFile = path
+                        parent == "app" || parent == "mobile" -> appGradleFile = path
+                        parent == projectName -> projectGradleFile = path
+                    }
+                }
     }
 
     // ----------------------------------------------------------------------------------------
@@ -177,93 +178,91 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String)
     private fun injectPluginStatement(statement: GradlePluginStatement) {
 
         val pluginStatement = "\n\t\t" + statement.qualifiedStatement
-        injectProjectPluginStatement(pluginStatement)
+        injectIntoProjectGradleFile(pluginStatement, ProjectGradlePosition.PLUGIN)
 
         val s = "\n" + statement.applyName
-        val position = if (statement.isApplyTop) InsertionPosition.TOP else InsertionPosition.BOTTOM
-        injectAppStatement(s, position)
+        val position = if (statement.isApplyTop) AppGradlePosition.TOP else AppGradlePosition.BOTTOM
+        injectIntoAppGradleFile(s, position)
     }
 
     private fun injectDependencyStatement(statement: GradleDependency) {
         val s = "\n\t" + statement.qualifiedStatement
-        injectAppStatement(s, InsertionPosition.DEPENDENCY)
+        injectIntoAppGradleFile(s, AppGradlePosition.DEPENDENCY)
     }
 
     private fun injectDependencyStatements(statements: List<GradleDependency>) {
         val statement = "\n" + statements.joinToString("\n") { s -> "\t" + s.qualifiedStatement }
-        injectAppStatement(statement, InsertionPosition.DEPENDENCY)
+        injectIntoAppGradleFile(statement, AppGradlePosition.DEPENDENCY)
     }
 
     private fun injectRepositoryStatement(statement: String) {
-        // TODO Inject repository into build.gradle file
+        injectIntoProjectGradleFile(statement, ProjectGradlePosition.REPOSITORY)
     }
 
-    private fun injectAppStatement(statement: String, position: InsertionPosition) {
+    private fun injectIntoAppGradleFile(statement: String, position: AppGradlePosition) {
 
-        val file = VfsUtil.findFileByIoFile(File(appGradleFile), true)
-        if (file != null) {
-            val document = FileDocumentManager.getInstance().getDocument(file)
-                    ?: return  // can't read the file. Ex: it is too big
+        val file = VfsUtil.findFileByIoFile(File(appGradleFile), true) ?: return
+        val document = FileDocumentManager.getInstance().getDocument(file) ?: return
 
-            CommandProcessor.getInstance().executeCommand(project, {
-                ApplicationManager.getApplication().runWriteAction {
+        CommandProcessor.getInstance().executeCommand(project, {
+            ApplicationManager.getApplication().runWriteAction {
 
-                    val offset = when (position) {
+                val offset = when (position) {
 
-                        InsertionPosition.DEPENDENCY -> {
-
-                            val index = StringUtil.lastIndexOfAny(document.charsSequence, "}")
-                            if (index == -1) {
-                                return@runWriteAction
-                            }
+                    AppGradlePosition.DEPENDENCY -> {
+                        val index = StringUtil.lastIndexOfAny(document.charsSequence, "}")
+                        if (index > -1) {
                             val lineNumber = document.getLineNumber(index)
                             document.getLineEndOffset(lineNumber - 1)
-                        }
-                        InsertionPosition.TOP -> document.getLineEndOffset(0)
-                        InsertionPosition.BOTTOM -> document.getLineEndOffset(document.lineCount - 1)
+                        } else -1
                     }
-
-                    document.insertString(offset, statement)
-
+                    AppGradlePosition.TOP -> document.getLineEndOffset(0)
+                    AppGradlePosition.BOTTOM -> document.getLineEndOffset(document.lineCount - 1)
                 }
-            }, "Update app build.dependency", null)
-        }
+
+                if (offset > -1) {
+                    document.insertString(offset, statement)
+                }
+            }
+        }, "Update app build.gradle file", null)
     }
 
-    private fun injectProjectPluginStatement(statement: String) {
+    private fun injectIntoProjectGradleFile(statement: String, position: ProjectGradlePosition) {
 
-        val file = VfsUtil.findFileByIoFile(File(projectGradleFile), true)
-        if (file != null) {
-            val document = FileDocumentManager.getInstance().getDocument(file)
-                    ?: return  // can't read the file. Ex: it is too big
+        val file = VfsUtil.findFileByIoFile(File(projectGradleFile), true) ?: return
+        val document = FileDocumentManager.getInstance().getDocument(file) ?: return
 
-            CommandProcessor.getInstance().executeCommand(project, {
-                ApplicationManager.getApplication().runWriteAction {
+        CommandProcessor.getInstance().executeCommand(project, {
+            ApplicationManager.getApplication().runWriteAction {
 
-                    val index = StringUtil.indexOf(document.charsSequence, "classpath")
-                    if (index == -1) {
-                        return@runWriteAction
-                    }
+                val startIdx: Int = when (position) {
+                    GradleDependencyInjector.ProjectGradlePosition.PLUGIN -> 0
+                    GradleDependencyInjector.ProjectGradlePosition.REPOSITORY -> StringUtil.indexOf(document.charsSequence, "allprojects")
+                }
+                val infix: String = when (position) {
+                    GradleDependencyInjector.ProjectGradlePosition.PLUGIN -> "classpath"
+                    GradleDependencyInjector.ProjectGradlePosition.REPOSITORY -> "repositories"
+                }
+
+                val index = StringUtil.indexOf(document.charsSequence, infix, startIdx)
+                if (index > -1) {
                     val lineNumber = document.getLineNumber(index)
                     val offset = document.getLineEndOffset(lineNumber)
-
                     document.insertString(offset, statement)
                 }
-            }, "Update project build.dependency", null)
-        }
-
+            }
+        }, "Update project build.gradle file", null)
     }
+
+    // ----------------------------------------------------------------------------------------
 
     private fun loadGradleStatements() {
 
         try {
 
-            // Read file
-            val inStream = javaClass.getResourceAsStream("/gradle_dependencies.json")
-            val depsString = IOUtils.toString(inStream, "UTF-8")
-            inStream.close()
-
+            val depsString = ConfigManager.loadGradleDependencies()
             val jsonObject = JsonParser().parse(depsString).asJsonObject
+
             val generalDependencies = jsonObject.get("dependencies").asJsonArray
             val pluginDependencies = jsonObject.get("plugins").asJsonArray
             val daggerDependencies = jsonObject.get("dagger").asJsonArray
