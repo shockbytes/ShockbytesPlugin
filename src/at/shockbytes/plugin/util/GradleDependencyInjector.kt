@@ -121,6 +121,7 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String,
 
     private fun createDaggerFiles() {
 
+        // TODO Fix this, Activities are now located in .ui.activity
         /* Do a little hack
         *
         * 1. Find MainActivity (we assume we have always a MainActivity in .core package

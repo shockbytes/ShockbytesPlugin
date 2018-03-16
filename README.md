@@ -1,5 +1,7 @@
 # Shockbytes Plugin for IntelliJ / Android Studio
 
+TODO Describe the plugin
+
 ## Versions
 
 ### 3.2
@@ -11,6 +13,7 @@
 - [ ] Resolve Google dependencies
 - [ ] Screengrab support
 - [ ] Show current version somewhere
+- [ ] Use Dagger for dependency injection
 
 ### 3.0
 * Android Utilities

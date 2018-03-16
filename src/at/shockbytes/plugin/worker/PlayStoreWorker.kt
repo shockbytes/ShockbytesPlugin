@@ -5,6 +5,10 @@ import java.awt.BorderLayout
 import javax.swing.JLabel
 import javax.swing.JPanel
 
+/**
+ * Author:  Martin Macheiner
+ * Date:    01.03.2018
+ */
 class PlayStoreWorker: Worker() {
 
     override val title = "Play Store Publishing"

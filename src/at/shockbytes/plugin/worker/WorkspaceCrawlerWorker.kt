@@ -1,7 +1,10 @@
 package at.shockbytes.plugin.worker
 
-import at.shockbytes.plugin.util.HelperUtil
+import at.shockbytes.plugin.service.workspace.CrawlOptions
+import at.shockbytes.plugin.service.workspace.DefaultWorkspaceCrawler
+import at.shockbytes.plugin.service.workspace.WorkspaceCrawler
 import at.shockbytes.plugin.util.ConfigManager
+import at.shockbytes.plugin.util.HelperUtil
 import at.shockbytes.plugin.view.MaterialListCellRenderer
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
@@ -25,9 +28,16 @@ import java.nio.file.StandardCopyOption
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 
+
 /**
- * Author:  Mescht
+ * Author:  Martin Macheiner
  * Date:    09.01.2017
+ *
+ * --> Kotlin implementation for file walking
+ * val files = File(workspaceDirectory).walk().maxDepth(15)
+ * .filter { fileFilter(it, keyword) }
+ * .map { it.absolutePath }
+ * .toList().toTypedArray()
  */
 class WorkspaceCrawlerWorker : Worker(), ActionListener {
 
@@ -38,13 +48,12 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
     private lateinit var labelStatus: JLabel
     private lateinit var searchList: JBList<String>
 
-    private val workspaceDirectory = ConfigManager.loadWorkspaceLocation()
+    private val crawler: WorkspaceCrawler = DefaultWorkspaceCrawler(ConfigManager.loadWorkspaceLocation())
 
     override val title = "Workspace Crawler"
     override val icon = IconLoader.getIcon("/icons/tab_workspace_crawler.png")
 
     override fun initializePanel() {
-
         rootPanel = JPanel(BorderLayout())
 
         val searchPanel = JPanel(GridLayout(5, 1, 2, 2))
@@ -65,6 +74,7 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
         rootPanel.add(searchPanel, BorderLayout.WEST)
 
         searchList = JBList()
+        searchList.setEmptyText("Ready")
         searchList.cellRenderer = MaterialListCellRenderer()
         searchList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
@@ -81,34 +91,6 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
             }
         })
         rootPanel.add(JBScrollPane(searchList), BorderLayout.CENTER)
-        initialize()
-    }
-
-    private fun initialize() {
-        searchList.setEmptyText("Ready")
-    }
-
-    private fun showPopup(e: MouseEvent?, filename: String) {
-
-        val menu = JPopupMenu()
-        val itemOpen = JMenuItem("Open folder in explorer")
-        itemOpen.icon = IconLoader.getIcon("/icons/ic_open_in_explorer.png")
-        itemOpen.addActionListener { openFile(File(filename).parentFile) }
-        menu.add(itemOpen)
-        val itemCopy = JMenuItem("Copy to workspace")
-        itemCopy.icon = IconLoader.getIcon("/icons/ic_copy.png")
-        itemCopy.addActionListener { copyIntoWorkspace(File(filename), e?.locationOnScreen ?: Point(0, 0)) }
-        menu.add(itemCopy)
-        menu.show(searchList, e?.point?.x ?: 0, e?.point?.y ?: 0)
-    }
-
-    private fun openFile(f: File) {
-        try {
-            Desktop.getDesktop().open(f)
-        } catch (e1: IOException) {
-            e1.printStackTrace()
-        }
-
     }
 
     override fun actionPerformed(e: ActionEvent) {
@@ -116,35 +98,25 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
         labelStatus.text = "Searching..."
         searchList.setEmptyText("Searching...")
         searchList.setPaintBusy(true)
-        Thread { searchForKeywordNative(textFieldInput.text) }.start()
-    }
 
-    private fun searchForKeywordNative(keyword: String) {
+        var start = 0L
+        crawler.crawl(textFieldInput.text, CrawlOptions(cbExcludeBinaries.isSelected,
+                cbExcludeProjectFiles.isSelected, cbExcludeGeneratedFiles.isSelected))
+                .doOnSubscribe { start = System.currentTimeMillis() }
+                .subscribe({ (keyword, files) ->
+                    val duration = (System.currentTimeMillis() - start) / 1000L
+                    SwingUtilities.invokeLater {
+                        searchList.setListData(files)
+                        labelStatus.text = "${files.size} files found (in ${duration}s)"
 
-        try {
-
-            val start = System.currentTimeMillis()
-
-            val files = File(workspaceDirectory).walk().maxDepth(15)
-                    .filter { fileFilter(it, keyword) }
-                    .map { it.absolutePath }
-                    .toList().toTypedArray()
-
-            val duration = System.currentTimeMillis() - start
-
-            SwingUtilities.invokeLater {
-                searchList.setListData(files)
-                labelStatus.text = files.size.toString() + " files found (in " + duration / 1000 + "s)"
-
-                if (files.isEmpty()) {
-                    searchList.setEmptyText("Nothing found for <$keyword>")
-                }
-                searchList.setPaintBusy(false)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
+                        if (files.isEmpty()) {
+                            searchList.setEmptyText("Nothing found for <$keyword>")
+                        }
+                        searchList.setPaintBusy(false)
+                    }
+                }, { throwable ->
+                    searchList.setEmptyText("Error while crawling the workspace: ${throwable.localizedMessage}")
+                })
     }
 
     private fun copyIntoWorkspace(file: File, p: Point) {
@@ -194,29 +166,26 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
         dialog.isVisible = true
     }
 
-    private fun fileFilter(f: File, keyword: String): Boolean {
+    private fun showPopup(e: MouseEvent?, filename: String) {
 
-        val n = f.name
-        return when {
+        val menu = JPopupMenu()
+        val itemOpen = JMenuItem("Open folder in explorer")
+        itemOpen.icon = IconLoader.getIcon("/icons/ic_open_in_explorer.png")
+        itemOpen.addActionListener { openFile(File(filename).parentFile) }
+        menu.add(itemOpen)
+        val itemCopy = JMenuItem("Copy to workspace")
+        itemCopy.icon = IconLoader.getIcon("/icons/ic_copy.png")
+        itemCopy.addActionListener { copyIntoWorkspace(File(filename), e?.locationOnScreen ?: Point(0, 0)) }
+        menu.add(itemCopy)
+        menu.show(searchList, e?.point?.x ?: 0, e?.point?.y ?: 0)
+    }
 
-            // Check if keyword is in path and it is not a directory
-            (!n.contains(keyword) || Files.isDirectory(f.toPath())) -> false
-
-            // Check for binary files
-            cbExcludeBinaries.isSelected && (n.endsWith(".class") || n.endsWith(".exe")
-                    || n.endsWith(".jar") || n.endsWith(".bat") || n.endsWith(".dex")) -> false
-
-            // Check for project files
-            cbExcludeProjectFiles.isSelected && (n.endsWith(".dependency") || n.endsWith(".xml")
-                    || n.endsWith(".iml") || n.endsWith(".properties")) -> false
-
-            // Check for generated files
-            cbExcludeGeneratedFiles.isSelected && (n.contains("$\$ViewBinder")
-                    || f.absolutePath.contains("build\\generated\\source\\kapt")
-                    || f.absolutePath.contains("build\\generated\\source\\apt")
-                    || f.absolutePath.contains("build\\tmp\\kapt3\\stubs")) -> false
-
-            else -> true
+    private fun openFile(f: File) {
+        try {
+            Desktop.getDesktop().open(f)
+        } catch (e1: IOException) {
+            e1.printStackTrace()
         }
     }
+
 }

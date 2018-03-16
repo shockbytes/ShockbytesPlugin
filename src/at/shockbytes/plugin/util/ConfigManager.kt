@@ -20,7 +20,7 @@ object ConfigManager {
 
     fun loadCustomCertificate(): CertificateParams {
 
-        val certAsJson = loadFileContent("/custom_certificate.json")
+        val certAsJson = loadFileContent("/sensitive/custom_certificate.json")
         val jsonObject = JsonParser().parse(certAsJson).asJsonObject
 
         val keyStorePath = jsonObject.get("path").asString
@@ -32,11 +32,11 @@ object ConfigManager {
     }
 
     fun loadFCMApiKey(): String {
-        return loadFileContent("/fcm_api_key.txt")
+        return loadFileContent("/sensitive/fcm_api_key.txt")
     }
 
     fun loadWorkspaceLocation(): String {
-        return loadFileContent("/workspace_location.txt")
+        return loadFileContent("/sensitive/workspace_location.txt")
     }
 
     fun loadGradleDependencies(): String {
@@ -68,5 +68,9 @@ object ConfigManager {
         val content = IOUtils.toString(inStream, "UTF-8").trim()
         inStream.close()
         return content
+    }
+
+    fun loadDebugCertificatePath(): String {
+        return System.getProperty("user.home") + "\\.android\\debug.keystore"
     }
 }

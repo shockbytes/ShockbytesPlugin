@@ -71,20 +71,10 @@ object HelperUtil {
     @Throws(IOException::class)
     fun getOutputFromProcess(p: Process?): String {
 
-        if (p == null) {
-            return ""
-        }
-        //InputStream stream = useErrorStream ? p.getErrorStream() : p.getInputStream();
-        val stream = p.inputStream
-        val inStream = BufferedReader(InputStreamReader(stream))
-        val sb = StringBuilder()
+        val inStream = BufferedReader(InputStreamReader(p?.inputStream))
         inStream.useLines {
-            it.forEach {
-                sb.append(it)
-                sb.append("\n")
-            }
+            return it.joinToString("\n")
         }
-        return sb.toString()
     }
 
     fun getPackagesFromProject(project: Project): List<String> {

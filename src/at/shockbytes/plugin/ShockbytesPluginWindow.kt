@@ -34,20 +34,13 @@ class ShockbytesPluginWindow : ToolWindowFactory {
         worker = listOf(AndroidWorker(),
                 WorkspaceCrawlerWorker(),
                 GradleWorker(),
-                ScreenCaptureHelper(),
+                ScreenCaptureWorker(),
                 PlayStoreWorker())
     }
 
     private fun createTabs(container: Container) {
         worker.forEach { w -> tabbedPane.addTab(w.title, w.icon, w.tabPanel) }
         container.add(tabbedPane)
-    }
-
-    // --------------------------------------------------------------------
-
-    companion object {
-
-        const val SHOCKBYTES_TITLE = "Shockbytes v3.0"
     }
 
 }

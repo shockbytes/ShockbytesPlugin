@@ -3,20 +3,21 @@ package at.shockbytes.plugin.worker
 import at.shockbytes.plugin.util.HelperUtil
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.components.JBScrollPane
-
-import javax.swing.*
-import javax.swing.filechooser.FileNameExtensionFilter
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Desktop
+import java.awt.GridLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.File
 import java.io.IOException
+import javax.swing.*
+import javax.swing.filechooser.FileNameExtensionFilter
 
 /**
- * Author:  Mescht
+ * Author:  Martin Macheiner
  * Date:    31.01.2017
  */
-class ScreenCaptureHelper : Worker(), ActionListener {
+class ScreenCaptureWorker : Worker(), ActionListener {
 
     private lateinit var btnStartAdb: JButton
     private lateinit var btnStopAdb: JButton

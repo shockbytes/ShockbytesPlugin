@@ -3,8 +3,8 @@ package at.shockbytes.plugin.service.apps
 import at.shockbytes.plugin.model.AppsSyncState
 import at.shockbytes.plugin.service.push.GooglePushService
 import at.shockbytes.plugin.service.push.PushService
-import at.shockbytes.plugin.util.HelperUtil
 import at.shockbytes.plugin.util.ConfigManager
+import at.shockbytes.plugin.util.HelperUtil
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
@@ -13,8 +13,13 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import org.apache.commons.io.IOUtils
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.InputStreamReader
 import java.util.*
 import javax.swing.JTextArea
 
@@ -38,20 +43,20 @@ class AppsSyncService(private val project: Project) {
         initializeAppsSyncState()
     }
 
-    @Throws(IOException::class)
-    fun tryCopyDebugAPK(outputArea: JTextArea) {
+    fun tryCopyDebugAPK(outputArea: JTextArea): Completable {
+        return Completable.fromAction {
+            val f = File("$outputDirectory/app-debug.apk")
+            if (!f.exists()) {
+                throw FileNotFoundException("APK not generated!")
+            }
 
-        val f = File(outputDirectory + "/app-debug.apk")
-        if (!f.exists()) {
-            throw FileNotFoundException("APK not generated!")
-        }
+            deviceToken = grabTokenFromDrive()
+            if (deviceToken == null) {
+                throw IllegalStateException("No token stored in Google Drive file apps_fcm_token.txt!")
+            }
 
-        deviceToken = grabTokenFromDrive()
-        if (deviceToken == null) {
-            throw IllegalStateException("No token stored in Google Drive file apps_fcm_token.txt!")
-        }
-
-        copyToGoogleDrive(projectName, f.absolutePath, outputArea)
+            copyToGoogleDrive(projectName, f.absolutePath, outputArea)
+        }.subscribeOn(Schedulers.io())
     }
 
     private fun initializeAppsSyncState() {
@@ -64,56 +69,40 @@ class AppsSyncService(private val project: Project) {
 
     private fun grabTokenFromDrive(): String? {
 
-        var token: String? = null
         val tokenFile = File(GOOGLE_DRIVE_FCM_TOKEN_PATH)
-        try {
-            InputStreamReader(FileInputStream(tokenFile)).use { `in` -> token = IOUtils.readLines(`in`)[0] }
+        return try {
+            InputStreamReader(FileInputStream(tokenFile)).use { inStream -> return IOUtils.readLines(inStream)[0] }
         } catch (e: Exception) {
             e.printStackTrace()
+            null
         }
-
-        return token
     }
 
     private fun copyToGoogleDrive(name: String, inApk: String, outputArea: JTextArea) {
 
-        //String inIconPath = outputDirectory + "/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png";
-        //String outIconPath = GOOGLE_DRIVE_PATH + name + ".png";
-
         val revision = revisionLookup(name)
         val outApkPath = GOOGLE_DRIVE_PATH + name + "_" + revision + ".apk"
 
-        try {
+        // Delete all old revisions in Google Drive first
+        cleanupOldRevisions(name)
+        // Copy APK
+        HelperUtil.copyFile(inApk, outApkPath)
 
-            // Delete all old revisions in Google Drive first
-            cleanupOldRevisions(name)
+        val title = "$name ready to update"
+        val body = "A new revision is available"
 
-            // Copy APK
-            HelperUtil.copyFile(inApk, outApkPath)
+        outputArea.append("$name Rev. $revision copied to destination folder\n")
 
-            // Copy icon
-            //HelperUtil.copyFile(inIconPath, outIconPath);
-
-            val title = name + " ready to update"
-            val body = "A new revision is available"
-
-            outputArea.append("$name Rev. $revision copied to destination folder\n")
-
-            val t = Timer()
-            t.schedule(object : TimerTask() {
-                override fun run() {
-                    if (pushManager.sendToDevice(deviceToken!!, title, body)) {
-                        showBalloonMessage("Shockbytes Apps", "Sync $name Rev. $revision",
-                                "Syncing $name.apk with Google Drive")
-                        //HelperUtil.deleteFile(new File(inApk));
-                    }
+        val t = Timer()
+        t.schedule(object : TimerTask() {
+            override fun run() {
+                if (pushManager.sendToDevice(deviceToken!!, title, body)) {
+                    showBalloonMessage("Shockbytes Apps", "Sync $name Rev. $revision",
+                            "Syncing $name.apk with Google Drive")
+                    //HelperUtil.deleteFile(new File(inApk));
                 }
-            }, 5000)
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
+            }
+        }, 5000)
     }
 
     private fun revisionLookup(name: String): Int {

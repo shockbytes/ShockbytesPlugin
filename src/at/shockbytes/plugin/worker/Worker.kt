@@ -1,10 +1,11 @@
 package at.shockbytes.plugin.worker
 
-import javax.swing.*
+import javax.swing.Icon
+import javax.swing.JPanel
 
 /**
- * Author: Martin Macheiner
- * Date: 22.03.2016.
+ * Author:  Martin Macheiner
+ * Date:    22.03.2016
  */
 abstract class Worker {
 
