@@ -16,26 +16,22 @@ import javax.swing.UIManager
  */
 class ShockbytesPluginWindow : ToolWindowFactory {
 
-    private lateinit var worker: List<Worker>
+    private val worker = listOf(
+            AndroidWorker(),
+            WorkspaceCrawlerWorker(),
+            GradleWorker(),
+            ScreenCaptureWorker(),
+            PlayStoreWorker())
 
     private var tabbedPane: JBTabbedPane = JBTabbedPane()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         setupViews()
-        initializeWorker()
         createTabs(toolWindow.component)
     }
 
     private fun setupViews() {
         UIManager.put("List.focusCellHighlightBorder", BorderFactory.createEmptyBorder())
-    }
-
-    private fun initializeWorker() {
-        worker = listOf(AndroidWorker(),
-                WorkspaceCrawlerWorker(),
-                GradleWorker(),
-                ScreenCaptureWorker(),
-                PlayStoreWorker())
     }
 
     private fun createTabs(container: Container) {

@@ -13,6 +13,8 @@ import java.io.InputStreamReader
  */
 class WindowsAdbService : AdbService {
 
+    private var recordProcess: Process? = null
+
     override fun connectToDevice(deviceIp: String, port: Int): Single<Pair<String, String>> {
         return Single.fromCallable {
             val cmdTcpIp = "adb tcpip $port"
@@ -99,6 +101,33 @@ class WindowsAdbService : AdbService {
                 "ADB server couldn't be killed: ${e.localizedMessage}"
             }
         }.subscribeOn(Schedulers.io())
+    }
+
+    override fun startScreenCapturing(): Single<String> {
+        return Single.fromCallable {
+
+            val recordCommand = "adb shell screenrecord $SCREEN_CAPTURE_TMP_FILE"
+            recordProcess = Runtime.getRuntime().exec(recordCommand)
+
+            "Start screen capturing...\n${HelperUtil.getOutputFromProcess(recordProcess)}\n"
+        }.subscribeOn(Schedulers.io())
+    }
+
+    override fun stopScreenCapturing(filePath: String): Single<Pair<String, String>> {
+        return Single.fromCallable {
+            recordProcess?.destroy()
+
+            val cmdCopy = "adb pull $SCREEN_CAPTURE_TMP_FILE $filePath"
+            val pullProcess = Runtime.getRuntime().exec(cmdCopy)
+            val output = "${HelperUtil.getOutputFromProcess(pullProcess)}\nFile copied to location: $filePath\n"
+
+            Pair(output, filePath)
+        }.subscribeOn(Schedulers.io())
+    }
+
+    companion object {
+
+        private const val SCREEN_CAPTURE_TMP_FILE = "/storage/emulated/0/tmp_sb.mp4"
     }
 
 }

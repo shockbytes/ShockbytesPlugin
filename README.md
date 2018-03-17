@@ -1,6 +1,12 @@
 # Shockbytes Plugin for IntelliJ / Android Studio
 
-TODO Describe the plugin
+Personal productivity enhancing IntelliJ/Android Studio plugin.
+For now the plugin includes utility methods for Android development,
+Gradle dependency management, Workspace crawling (searching your
+workspace) and screen capture methods. 
+
+Screengrab support and a general Fastlane support is planned in a later
+release.
 
 ## Versions
 

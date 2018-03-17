@@ -1,6 +1,7 @@
 package at.shockbytes.plugin.worker
 
-import at.shockbytes.plugin.util.HelperUtil
+import at.shockbytes.plugin.service.android.AdbService
+import at.shockbytes.plugin.service.android.WindowsAdbService
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
@@ -9,7 +10,6 @@ import java.awt.GridLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.File
-import java.io.IOException
 import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
 
@@ -25,7 +25,8 @@ class ScreenCaptureWorker : Worker(), ActionListener {
     private lateinit var textAreaAdb: JTextArea
 
     private var recordedPath: String? = null
-    private var recordProcess: Process? = null
+
+    private val adbService: AdbService = WindowsAdbService()
 
     override val title = "Screen Capture"
     override val icon = IconLoader.getIcon("/icons/tab_screen_record.png")
@@ -62,6 +63,14 @@ class ScreenCaptureWorker : Worker(), ActionListener {
         rootPanel.add(mainPane)
     }
 
+    override fun actionPerformed(e: ActionEvent) {
+        when {
+            e.source === btnStartAdb -> startScreenCapturing()
+            e.source === btnStopAdb -> stopScreenCapturing()
+            e.source === btnPlayAdb -> playRecordedVideo()
+        }
+    }
+
     private fun updateButtons(isCapturing: Boolean, onError: Boolean) {
 
         SwingUtilities.invokeLater {
@@ -86,27 +95,16 @@ class ScreenCaptureWorker : Worker(), ActionListener {
         SwingUtilities.invokeLater { textAreaAdb.append(text) }
     }
 
-    private fun runScreenCapturing() {
-
-        try {
-
-            updateTextArea("Start screen capturing...\n")
-            val recordCommand = "adb shell screenrecord " + TMP_FILE
-            recordProcess = Runtime.getRuntime().exec(recordCommand)
-            updateTextArea(HelperUtil.getOutputFromProcess(recordProcess) + "\n")
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-            updateButtons(false, true)
-            updateTextArea(e.message + "\n")
-        }
-
-    }
-
     private fun startScreenCapturing() {
-
         updateButtons(true, false)
-        Thread(Runnable { this.runScreenCapturing() }).start()
+
+        adbService.startScreenCapturing().subscribe({ output ->
+            updateTextArea(output)
+        }, { throwable ->
+            throwable.printStackTrace()
+            updateButtons(false, true)
+            updateTextArea("${throwable.localizedMessage}\n")
+        })
     }
 
     private fun showFileStorageDialog(): String? {
@@ -125,65 +123,28 @@ class ScreenCaptureWorker : Worker(), ActionListener {
 
     private fun stopScreenCapturing() {
 
-        if (recordProcess != null) {
-            recordProcess!!.destroy()
+        val filePath = showFileStorageDialog() ?: return
+        adbService.stopScreenCapturing(filePath).subscribe({ (output, destination) ->
             updateButtons(false, false)
-
-            try {
-
-                val destFile = showFileStorageDialog()
-                if (destFile == null) {
-                    updateTextArea("Copying needs a specified destination path!\n")
-                    return
-                }
-
-                val cmdCopy = "adb pull ${TMP_FILE} $destFile"
-                val pullProcess = Runtime.getRuntime().exec(cmdCopy)
-                updateTextArea(HelperUtil.getOutputFromProcess(pullProcess)
-                        + "\nFile copied to location: " + destFile + "\n")
-
-                // Store it later if no exception occurred
-                recordedPath = destFile
-
-            } catch (e: IOException) {
-                e.printStackTrace()
-                btnPlayAdb.isEnabled = false
-                updateTextArea(e.message + "\n")
-            }
-
-        }
+            updateTextArea(output)
+            recordedPath = destination
+        }, { throwable ->
+            throwable.printStackTrace()
+            btnPlayAdb.isEnabled = false
+            updateTextArea("${throwable.message}\n")
+        })
     }
 
     private fun playRecordedVideo() {
 
         try {
-
-            if (recordedPath != null) {
-                Desktop.getDesktop().open(File(recordedPath))
-                updateTextArea("Play file: " + recordedPath + "\n")
-            } else {
-                updateTextArea("There is no recording path initialized...\n")
-            }
-
+            Desktop.getDesktop().open(File(recordedPath))
+            updateTextArea("Play file: $recordedPath\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            updateTextArea(e.message + "\n")
-        }
-
-    }
-
-    override fun actionPerformed(e: ActionEvent) {
-
-        when {
-            e.source === btnStartAdb -> startScreenCapturing()
-            e.source === btnStopAdb -> stopScreenCapturing()
-            e.source === btnPlayAdb -> playRecordedVideo()
+            updateTextArea("${e.localizedMessage}\n")
         }
     }
 
-    companion object {
-
-        private const val TMP_FILE = "/storage/emulated/0/tmp_sb.mp4"
-    }
 }
 

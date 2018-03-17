@@ -7,6 +7,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
 
+/**
+ * Author:  Martin Macheiner
+ * Date:    16.03.2018
+ */
 class DefaultWorkspaceCrawler(private val workspaceDirectory: String) : WorkspaceCrawler {
 
     override fun crawl(keyword: String, crawlOptions: CrawlOptions): Single<Pair<String, Array<String>>> {
@@ -41,6 +45,7 @@ class DefaultWorkspaceCrawler(private val workspaceDirectory: String) : Workspac
             crawlOptions.excludeGenerated && (n.contains("$\$ViewBinder")
                     || f.absolutePath.contains("build\\generated\\source\\kapt")
                     || f.absolutePath.contains("build\\generated\\source\\apt")
+                    || f.absolutePath.contains("build\\intermediates\\res\\merged")
                     || f.absolutePath.contains("build\\tmp\\kapt3\\stubs")) -> false
 
             else -> true

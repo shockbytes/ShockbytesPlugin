@@ -10,16 +10,18 @@ import io.reactivex.Single
 interface CertificateService {
 
     /**
+     * Retrieve fingerprint information of the debug certificate.
      *
-     * @param keyStorePath
-     * @return
+     * @param keyStorePath Path to the debug keystore (as it may be dependent of the underlying OS)
+     * @return String representation of the retrieved fingerprints
      */
     fun getDebugCertificate(keyStorePath: String): Single<String>
 
     /**
+     * Retrieve fingerprint information of the custom certificate.
      *
-     * @param certParams
-     * @return
+     * @param certParams parameters for accessing the keystore wrapped into a {@link CertificateParams} object
+     * @return String representation of the retrieved fingerprints
      */
     fun getCustomCertificate(certParams: CertificateParams): Single<String>
 

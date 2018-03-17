@@ -3,35 +3,35 @@
     {
       "title": "AppCompat Support library",
       "statement": "implementation \"com.android.support:appcompat-v7:_VERSION_\"",
-      "version": "26.0.0",
+      "version": "26.1.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "Support library v4",
       "statement": "implementation \"com.android.support:support-v4:_VERSION_\"",
-      "version": "26.0.0",
+      "version": "26.1.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "Design Support library",
       "statement": "implementation \"com.android.support:design:_VERSION_\"",
-      "version": "26.0.0",
+      "version": "26.1.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "CardView Support library",
       "statement": "implementation \"com.android.support:cardview-v7:_VERSION_\"",
-      "version": "26.0.0",
+      "version": "26.1.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "Palette Support library",
       "statement": "implementation \"com.android.support:palette-v7:_VERSION_\"",
-      "version": "26.0.0",
+      "version": "26.1.0",
       "query": "TODO",
       "endpoint": "google"
     },
@@ -45,21 +45,21 @@
     {
       "title": "Google Fit",
       "statement": "implementation \"com.google.android.gms:play-services-fitness:_VERSION_\"",
-      "version": "11.2.0",
+      "version": "11.8.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "Vision Play Services",
       "statement": "implementation \"com.google.android.gms:play-services-vision:_VERSION_\"",
-      "version": "11.2.0",
+      "version": "11.8.0",
       "query": "TODO",
       "endpoint": "google"
     },
     {
       "title": "Google Drive",
       "statement": "implementation \"com.google.android.gms:play-services-drive:_VERSION_\"",
-      "version": "11.2.0",
+      "version": "11.8.0",
       "query": "TODO",
       "endpoint": "google"
     },
@@ -269,6 +269,13 @@
       "version": "3.2.0",
       "applyTop": false,
       "applyName": "apply plugin: \"com.google.gms.google-services\""
+    },
+    {
+      "title": "Kotlin",
+      "statement": "classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:_VERSION_\"",
+      "version": "1.2.30",
+      "applyTop": true,
+      "applyName": "apply plugin: 'kotlin-android'\napply plugin: 'kotlin-kapt'\napply plugin: 'kotlin-android-extensions'"
     }
   ],
   "dagger": [
