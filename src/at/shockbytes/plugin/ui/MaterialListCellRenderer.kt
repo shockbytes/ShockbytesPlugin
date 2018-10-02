@@ -1,4 +1,4 @@
-package at.shockbytes.plugin.view
+package at.shockbytes.plugin.ui
 
 import javax.swing.*
 import java.awt.*
