@@ -1,10 +1,9 @@
 package at.shockbytes.plugin.service.apps
 
 import at.shockbytes.plugin.model.AppsSyncState
-import at.shockbytes.plugin.service.push.GooglePushService
+import at.shockbytes.plugin.service.push.GoogleDriveOptions
 import at.shockbytes.plugin.service.push.PushService
-import at.shockbytes.plugin.util.ConfigManager
-import at.shockbytes.plugin.util.HelperUtil
+import at.shockbytes.plugin.util.IOUtils
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
@@ -15,7 +14,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -27,7 +25,9 @@ import javax.swing.JTextArea
  * Author:  Martin Macheiner
  * Date:    17.04.2017
  */
-class AppsSyncService(private val project: Project) {
+class AppsSyncService(private val project: Project,
+                      private val pushManager: PushService,
+                      private val googleDriveOptions: GoogleDriveOptions) {
 
     private val projectName: String = project.name
     private val outputDirectory: String = project.basePath + "/app/build/outputs/apk"
@@ -36,10 +36,7 @@ class AppsSyncService(private val project: Project) {
 
     private var syncState: AppsSyncState? = null
 
-    private val pushManager: PushService
-
     init {
-        pushManager = GooglePushService(ConfigManager.loadFCMApiKey())
         initializeAppsSyncState()
     }
 
@@ -69,9 +66,9 @@ class AppsSyncService(private val project: Project) {
 
     private fun grabTokenFromDrive(): String? {
 
-        val tokenFile = File(GOOGLE_DRIVE_FCM_TOKEN_PATH)
+        val tokenFile = File(googleDriveOptions.fcmTokenSyncPath)
         return try {
-            InputStreamReader(FileInputStream(tokenFile)).use { inStream -> return IOUtils.readLines(inStream)[0] }
+            InputStreamReader(FileInputStream(tokenFile)).use { return org.apache.commons.io.IOUtils.readLines(it)[0] }
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -81,12 +78,12 @@ class AppsSyncService(private val project: Project) {
     private fun copyToGoogleDrive(name: String, inApk: String, outputArea: JTextArea) {
 
         val revision = revisionLookup(name)
-        val outApkPath = GOOGLE_DRIVE_PATH + name + "_" + revision + ".apk"
+        val outApkPath = "${googleDriveOptions.drivePathApps}${name}_$revision.apk"
 
         // Delete all old revisions in Google Drive first
         cleanupOldRevisions(name)
         // Copy APK
-        HelperUtil.copyFile(inApk, outApkPath)
+        IOUtils.copyFile(inApk, outApkPath)
 
         val title = "$name ready to update"
         val body = "A new revision is available"
@@ -99,7 +96,7 @@ class AppsSyncService(private val project: Project) {
                 if (pushManager.sendToDevice(deviceToken!!, title, body)) {
                     showBalloonMessage("Shockbytes Apps", "Sync $name Rev. $revision",
                             "Syncing $name.apk with Google Drive")
-                    //HelperUtil.deleteFile(new File(inApk));
+                    //IdeaProjectUtils.deleteFile(new File(inApk));
                 }
             }
         }, 5000)
@@ -120,12 +117,9 @@ class AppsSyncService(private val project: Project) {
     }
 
     private fun cleanupOldRevisions(name: String) {
-
-        val out = File(GOOGLE_DRIVE_PATH)
-        val files = out.list()
-        files
-                ?.filter { it.startsWith(name + "_") && it.endsWith(".apk") }
-                ?.forEach { HelperUtil.deleteFile(File(GOOGLE_DRIVE_PATH + it)) }
+        File(googleDriveOptions.drivePathApps).list()
+                .filter { it.startsWith("${name}_") && it.endsWith(".apk") }
+                .forEach { IOUtils.deleteFile(File("${googleDriveOptions.drivePathApps}$it")) }
     }
 
     private fun showBalloonMessage(title: String, subtitle: String, content: String) {
@@ -141,10 +135,6 @@ class AppsSyncService(private val project: Project) {
         private val GROUP_DISPLAY_ID_INFO = NotificationGroup("Shockbytes Apps",
                 NotificationDisplayType.BALLOON, true, null,
                 IconLoader.getIcon("/icons/ic_google_drive.png"))
-
-        private const val GOOGLE_DRIVE_PATH = "C:/Users/Mescht/Google Drive/apps/"
-        private const val GOOGLE_DRIVE_FCM_TOKEN_PATH = "C:/Users/Mescht/Google Drive/apps_fcm_token.txt"
-
     }
 
 }

@@ -1,11 +1,9 @@
 package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.service.workspace.CrawlOptions
-import at.shockbytes.plugin.service.workspace.DefaultWorkspaceCrawler
 import at.shockbytes.plugin.service.workspace.WorkspaceCrawler
-import at.shockbytes.plugin.util.ConfigManager
-import at.shockbytes.plugin.util.HelperUtil
-import at.shockbytes.plugin.view.MaterialListCellRenderer
+import at.shockbytes.plugin.util.IdeaProjectUtils
+import at.shockbytes.plugin.ui.MaterialListCellRenderer
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.IconLoader
@@ -39,7 +37,7 @@ import javax.swing.border.EmptyBorder
  * .map { it.absolutePath }
  * .toList().toTypedArray()
  */
-class WorkspaceCrawlerWorker : Worker(), ActionListener {
+class WorkspaceCrawlerWorker(private val crawler: WorkspaceCrawler) : Worker(), ActionListener {
 
     private lateinit var textFieldInput: JTextField
     private lateinit var cbExcludeBinaries: JCheckBox
@@ -47,8 +45,6 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
     private lateinit var cbExcludeGeneratedFiles: JCheckBox
     private lateinit var labelStatus: JLabel
     private lateinit var searchList: JBList<String>
-
-    private val crawler: WorkspaceCrawler = DefaultWorkspaceCrawler(ConfigManager.loadWorkspaceLocation())
 
     override val title = "Workspace Crawler"
     override val icon = IconLoader.getIcon("/icons/tab_workspace_crawler.png")
@@ -126,8 +122,8 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
             JOptionPane.showMessageDialog(rootPanel, "There is no open project!")
             return
         }
-        showCopyDialog(file, p, HelperUtil.getPackagesFromProject(projects[0]),
-                HelperUtil.getSourceRootFolder(projects[0]))
+        showCopyDialog(file, p, IdeaProjectUtils.getPackagesFromProject(projects[0]),
+                IdeaProjectUtils.getSourceRootFolder(projects[0]))
     }
 
     private fun showCopyDialog(f: File, p: Point, packages: List<String>, sourceRootPath: String?) {
@@ -140,7 +136,7 @@ class WorkspaceCrawlerWorker : Worker(), ActionListener {
         dialog.setBounds(p.x, p.y - width, width, width)
         dialog.isModal = true
         dialog.add(JLabel("Choose destination package"))
-        val comboBox = ComboBox(CollectionComboBoxModel<String>(HelperUtil.getDisplayablePackageName(packages)))
+        val comboBox = ComboBox(CollectionComboBoxModel<String>(IdeaProjectUtils.getDisplayablePackageName(packages)))
         dialog.add(comboBox)
 
         val textField = JTextField(f.name)

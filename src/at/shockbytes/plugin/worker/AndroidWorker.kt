@@ -2,9 +2,9 @@ package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.service.android.AdbService
 import at.shockbytes.plugin.service.android.CertificateService
-import at.shockbytes.plugin.service.android.KeyStoreBackedCertificateService
-import at.shockbytes.plugin.service.android.WindowsAdbService
 import at.shockbytes.plugin.service.apps.AppsSyncService
+import at.shockbytes.plugin.service.push.GoogleDriveOptions
+import at.shockbytes.plugin.service.push.PushService
 import at.shockbytes.plugin.util.ConfigManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.IconLoader
@@ -16,7 +16,10 @@ import java.awt.event.ActionListener
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 
-class AndroidWorker : Worker(), ActionListener {
+class AndroidWorker(private val adbService: AdbService,
+                    private val certificateService: CertificateService,
+                    private val pushService: PushService,
+                    private val gDriveOptions: GoogleDriveOptions) : Worker(), ActionListener {
 
     private lateinit var outputArea: JTextArea
     private lateinit var textFieldIp: JTextField
@@ -32,11 +35,9 @@ class AndroidWorker : Worker(), ActionListener {
     private lateinit var btnShockCert: JButton
     private lateinit var labelInfo: JLabel
 
-    private val adbService: AdbService = WindowsAdbService()
     private val appsSyncer: AppsSyncService by lazy {
-        AppsSyncService(ProjectManager.getInstance().openProjects[0])
+        AppsSyncService(ProjectManager.getInstance().openProjects[0], pushService, gDriveOptions)
     }
-    private val certificateService: CertificateService = KeyStoreBackedCertificateService()
 
     override val title = "Android Utilities"
     override val icon = IconLoader.getIcon("/icons/tab_android.png")

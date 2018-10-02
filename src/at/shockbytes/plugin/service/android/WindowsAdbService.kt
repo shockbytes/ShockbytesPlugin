@@ -1,6 +1,6 @@
 package at.shockbytes.plugin.service.android
 
-import at.shockbytes.plugin.util.HelperUtil
+import at.shockbytes.plugin.util.IOUtils
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.io.BufferedReader
@@ -23,9 +23,9 @@ class WindowsAdbService : AdbService {
 
             Runtime.getRuntime().exec(cmdTcpIp)
             val connectProcess = Runtime.getRuntime().exec(cmdConnect)
-            val connectionProcessOutput = "${HelperUtil.getOutputFromProcess(connectProcess)}\n"
+            val connectionProcessOutput = "${IOUtils.readProcessOutput(connectProcess)}\n"
             val deviceProcess = Runtime.getRuntime().exec(cmdDevices)
-            val connectedDevice = HelperUtil.getOutputFromProcess(deviceProcess)
+            val connectedDevice = IOUtils.readProcessOutput(deviceProcess)
 
             Pair(connectionProcessOutput, connectedDevice)
         }.subscribeOn(Schedulers.io())
@@ -39,7 +39,7 @@ class WindowsAdbService : AdbService {
 
                 Runtime.getRuntime().exec(cmdForwardTcp)
                 val p = Runtime.getRuntime().exec(cmdConnect)
-                "${HelperUtil.getOutputFromProcess(p)}\n\n"
+                "${IOUtils.readProcessOutput(p)}\n\n"
             } catch (e: IOException) {
                 "Unable to connect to wearable: ${e.localizedMessage}\n"
             }
@@ -51,7 +51,7 @@ class WindowsAdbService : AdbService {
             try {
                 val cmdDisconnect = "adb usb"
                 val disconnectProcess = Runtime.getRuntime().exec(cmdDisconnect)
-                "Switch back to USB connection.\n${HelperUtil.getOutputFromProcess(disconnectProcess)}\n\n"
+                "Switch back to USB connection.\n${IOUtils.readProcessOutput(disconnectProcess)}\n\n"
             } catch (e: IOException) {
                 "Unable to disconnect due to following reason: ${e.localizedMessage}"
             }
@@ -93,7 +93,7 @@ class WindowsAdbService : AdbService {
 
                 Runtime.getRuntime().exec(cmdKillServer)
                 val p = Runtime.getRuntime().exec(cmdStartServer)
-                val output = HelperUtil.getOutputFromProcess(p)
+                val output = IOUtils.readProcessOutput(p)
 
                 "ADB server killed...\n$output\n\n"
             } catch (e: IOException) {
@@ -109,7 +109,7 @@ class WindowsAdbService : AdbService {
             val recordCommand = "adb shell screenrecord $SCREEN_CAPTURE_TMP_FILE"
             recordProcess = Runtime.getRuntime().exec(recordCommand)
 
-            "Start screen capturing...\n${HelperUtil.getOutputFromProcess(recordProcess)}\n"
+            "Start screen capturing...\n${IOUtils.readProcessOutput(recordProcess)}\n"
         }.subscribeOn(Schedulers.io())
     }
 
@@ -119,7 +119,7 @@ class WindowsAdbService : AdbService {
 
             val cmdCopy = "adb pull $SCREEN_CAPTURE_TMP_FILE $filePath"
             val pullProcess = Runtime.getRuntime().exec(cmdCopy)
-            val output = "${HelperUtil.getOutputFromProcess(pullProcess)}\nFile copied to location: $filePath\n"
+            val output = "${IOUtils.readProcessOutput(pullProcess)}\nFile copied to location: $filePath\n"
 
             Pair(output, filePath)
         }.subscribeOn(Schedulers.io())

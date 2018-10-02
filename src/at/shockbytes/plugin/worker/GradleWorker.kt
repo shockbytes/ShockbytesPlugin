@@ -1,8 +1,8 @@
 package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.util.GradleDependencyInjector
-import at.shockbytes.plugin.util.HelperUtil
-import at.shockbytes.plugin.view.MaterialListCellRenderer
+import at.shockbytes.plugin.util.IdeaProjectUtils
+import at.shockbytes.plugin.ui.MaterialListCellRenderer
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.IconLoader
@@ -112,7 +112,7 @@ class GradleWorker : Worker(), ActionListener {
     private fun initialize() {
 
         val p = ProjectManager.getInstance().openProjects[0]
-        val rootFolder = HelperUtil.getProjectRootFolder(p)
+        val rootFolder = IdeaProjectUtils.getProjectRootFolder(p)
         gradle = GradleDependencyInjector(p, rootFolder!!)
     }
 

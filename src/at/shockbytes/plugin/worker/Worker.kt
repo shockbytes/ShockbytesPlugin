@@ -11,11 +11,10 @@ abstract class Worker {
 
     protected var rootPanel: JPanel = JPanel()
 
-    val tabPanel: JPanel
-        get() {
-            initializePanel()
-            return rootPanel
-        }
+    val tabPanel: JPanel by lazy {
+        initializePanel()
+        rootPanel
+    }
 
     abstract val title: String
 

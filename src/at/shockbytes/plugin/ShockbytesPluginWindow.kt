@@ -1,6 +1,7 @@
 package at.shockbytes.plugin
 
 
+import at.shockbytes.plugin.platform.PlatformManager
 import at.shockbytes.plugin.worker.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -16,12 +17,15 @@ import javax.swing.UIManager
  */
 class ShockbytesPluginWindow : ToolWindowFactory {
 
-    private val worker = listOf(
-            AndroidWorker(),
-            WorkspaceCrawlerWorker(),
-            GradleWorker(),
-            ScreenCaptureWorker(),
-            PlayStoreWorker())
+    private val platformManager: PlatformManager = PlatformManager.forPlatform(System.getProperty("os.name"))
+
+    private val worker by lazy {
+        listOf(AndroidWorker(platformManager.adbService, platformManager.certificateService, platformManager.pushService),
+                WorkspaceCrawlerWorker(platformManager.workSpaceCrawler),
+                GradleWorker(),
+                ScreenCaptureWorker(platformManager.adbService),
+                PlayStoreWorker())
+    }
 
     private var tabbedPane: JBTabbedPane = JBTabbedPane()
 

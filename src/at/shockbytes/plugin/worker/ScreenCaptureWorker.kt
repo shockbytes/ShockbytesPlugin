@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
  * Author:  Martin Macheiner
  * Date:    31.01.2017
  */
-class ScreenCaptureWorker : Worker(), ActionListener {
+class ScreenCaptureWorker(private val adbService: AdbService) : Worker(), ActionListener {
 
     private lateinit var btnStartAdb: JButton
     private lateinit var btnStopAdb: JButton
@@ -25,8 +25,6 @@ class ScreenCaptureWorker : Worker(), ActionListener {
     private lateinit var textAreaAdb: JTextArea
 
     private var recordedPath: String? = null
-
-    private val adbService: AdbService = WindowsAdbService()
 
     override val title = "Screen Capture"
     override val icon = IconLoader.getIcon("/icons/tab_screen_record.png")
