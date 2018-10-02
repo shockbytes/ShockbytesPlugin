@@ -33,7 +33,9 @@ class AndroidWorker : Worker(), ActionListener {
     private lateinit var labelInfo: JLabel
 
     private val adbService: AdbService = WindowsAdbService()
-    private val appsSyncer: AppsSyncService = AppsSyncService(ProjectManager.getInstance().openProjects[0])
+    private val appsSyncer: AppsSyncService by lazy {
+        AppsSyncService(ProjectManager.getInstance().openProjects[0])
+    }
     private val certificateService: CertificateService = KeyStoreBackedCertificateService()
 
     override val title = "Android Utilities"
@@ -191,7 +193,7 @@ class AndroidWorker : Worker(), ActionListener {
     }
 
     private fun showCustomCertificateInformation() {
-        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificate())
+        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificates()[0]) // TODO Update UI to handle multiple certs
                 .subscribe { certInfo ->
                     outputArea.append(certInfo)
                 }

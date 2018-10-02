@@ -5,7 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.stream.Collectors
+import kotlin.streams.asSequence
 
 /**
  * Author:  Martin Macheiner
@@ -17,9 +17,10 @@ class DefaultWorkspaceCrawler(private val workspaceDirectory: String) : Workspac
         return Single.fromCallable {
             val files = Files.walk(Paths.get(workspaceDirectory))
                     .parallel()
+                    .asSequence()
                     .filter { fileFilter(it.toFile(), keyword.toLowerCase(), crawlOptions) }
                     .map { p -> p.toAbsolutePath().toString() }
-                    .collect(Collectors.toList())
+                    .toList()
                     .toTypedArray()
             Pair(keyword, files)
         }.subscribeOn(Schedulers.io())

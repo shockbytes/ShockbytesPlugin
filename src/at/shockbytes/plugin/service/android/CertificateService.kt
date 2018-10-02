@@ -1,6 +1,6 @@
 package at.shockbytes.plugin.service.android
 
-import at.shockbytes.plugin.model.CertificateParams
+import at.shockbytes.plugin.model.SigningCertificate
 import io.reactivex.Single
 
 /**
@@ -20,9 +20,9 @@ interface CertificateService {
     /**
      * Retrieve fingerprint information of the custom certificate.
      *
-     * @param certParams parameters for accessing the keystore wrapped into a {@link CertificateParams} object
+     * @param certSigning parameters for accessing the keystore wrapped into a {@link SigningCertificate} object
      * @return String representation of the retrieved fingerprints
      */
-    fun getCustomCertificate(certParams: CertificateParams): Single<String>
+    fun getCustomCertificate(certSigning: SigningCertificate): Single<String>
 
 }

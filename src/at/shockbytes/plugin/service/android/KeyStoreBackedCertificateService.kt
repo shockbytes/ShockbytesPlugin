@@ -1,6 +1,6 @@
 package at.shockbytes.plugin.service.android
 
-import at.shockbytes.plugin.model.CertificateParams
+import at.shockbytes.plugin.model.SigningCertificate
 import at.shockbytes.plugin.util.HelperUtil
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -22,9 +22,9 @@ class KeyStoreBackedCertificateService : CertificateService {
                 "android".toCharArray(), "android".toCharArray(), true)
     }
 
-    override fun getCustomCertificate(certParams: CertificateParams): Single<String> {
-        return grabCertificateInformation(certParams.keyStorePath, certParams.alias,
-                certParams.keyStorePassword, certParams.entryPassword, false)
+    override fun getCustomCertificate(certSigning: SigningCertificate): Single<String> {
+        return grabCertificateInformation(certSigning.keyStorePath, certSigning.alias,
+                certSigning.keyStorePassword, certSigning.entryPassword, false)
     }
 
     private fun grabCertificateInformation(keyStorePath: String, alias: String, keyStorePassword: CharArray,
