@@ -1,7 +1,7 @@
 package at.shockbytes.plugin.service.android
 
-import at.shockbytes.plugin.model.CertificateParams
-import at.shockbytes.plugin.util.HelperUtil
+import at.shockbytes.plugin.model.SigningCertificate
+import at.shockbytes.plugin.util.PluginUtils
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.io.FileInputStream
@@ -22,9 +22,9 @@ class KeyStoreBackedCertificateService : CertificateService {
                 "android".toCharArray(), "android".toCharArray(), true)
     }
 
-    override fun getCustomCertificate(certParams: CertificateParams): Single<String> {
-        return grabCertificateInformation(certParams.keyStorePath, certParams.alias,
-                certParams.keyStorePassword, certParams.entryPassword, false)
+    override fun getCustomCertificate(certSigning: SigningCertificate): Single<String> {
+        return grabCertificateInformation(certSigning.keyStorePath, certSigning.alias,
+                certSigning.keyStorePassword, certSigning.entryPassword, false)
     }
 
     private fun grabCertificateInformation(keyStorePath: String, alias: String, keyStorePassword: CharArray,
@@ -47,8 +47,9 @@ class KeyStoreBackedCertificateService : CertificateService {
                     "CUSTOM CERTIFICATE FINGERPRINTS\nCustom certificate located at: ")
                 sb.append(keyStorePath)
                 sb.append("\n\n")
-                sb.append("SHA1:\t${getCertFingerPrint("SHA1", entry.certificate)}\n")
-                sb.append("MD5:\t${getCertFingerPrint("MD5", entry.certificate)}\n")
+                sb.append("MD5:   \t${getCertFingerPrint("MD5", entry.certificate)}\n")
+                sb.append("SHA1:  \t${getCertFingerPrint("SHA1", entry.certificate)}\n")
+                sb.append("SHA256:\t${getCertFingerPrint("SHA-256", entry.certificate)}\n")
                 sb.append(separator)
                 sb.toString()
 
@@ -64,6 +65,6 @@ class KeyStoreBackedCertificateService : CertificateService {
         val encCertInfo = cert.encoded
         val md = MessageDigest.getInstance(mdAlg)
         val digest = md.digest(encCertInfo)
-        return HelperUtil.toHexString(digest)
+        return PluginUtils.toHexString(digest)
     }
 }

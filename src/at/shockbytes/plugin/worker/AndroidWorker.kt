@@ -2,153 +2,73 @@ package at.shockbytes.plugin.worker
 
 import at.shockbytes.plugin.service.android.AdbService
 import at.shockbytes.plugin.service.android.CertificateService
-import at.shockbytes.plugin.service.android.KeyStoreBackedCertificateService
-import at.shockbytes.plugin.service.android.WindowsAdbService
 import at.shockbytes.plugin.service.apps.AppsSyncService
+import at.shockbytes.plugin.service.push.GoogleDriveOptions
+import at.shockbytes.plugin.service.push.PushService
 import at.shockbytes.plugin.util.ConfigManager
+import at.shockbytes.plugin.view.AndroidWorkerView
+import at.shockbytes.plugin.view.WorkerView
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.IconLoader
-import com.intellij.ui.components.JBScrollPane
-import java.awt.BorderLayout
-import java.awt.GridLayout
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import javax.swing.*
-import javax.swing.border.EmptyBorder
 
-class AndroidWorker : Worker(), ActionListener {
-
-    private lateinit var outputArea: JTextArea
-    private lateinit var textFieldIp: JTextField
-    private lateinit var textFieldPort: JTextField
-    private lateinit var textFieldPortWear: JTextField
-    private lateinit var btnDiscoverIp: JButton
-    private lateinit var btnConnect: JButton
-    private lateinit var btnConnectWear: JButton
-    private lateinit var btnDisconnect: JButton
-    private lateinit var btnRestartServer: JButton
-    private lateinit var btnSendToDevice: JButton
-    private lateinit var btnDebugCert: JButton
-    private lateinit var btnShockCert: JButton
-    private lateinit var labelInfo: JLabel
-
-    private val adbService: AdbService = WindowsAdbService()
-    private val appsSyncer: AppsSyncService = AppsSyncService(ProjectManager.getInstance().openProjects[0])
-    private val certificateService: CertificateService = KeyStoreBackedCertificateService()
+class AndroidWorker(private val adbService: AdbService,
+                    private val certificateService: CertificateService,
+                    private val pushService: PushService,
+                    private val gDriveOptions: GoogleDriveOptions) : Worker<JPanel>() {
 
     override val title = "Android Utilities"
     override val icon = IconLoader.getIcon("/icons/tab_android.png")
+    override var view: WorkerView<JPanel> = AndroidWorkerView(this)
 
-    override fun initializePanel() {
-        rootPanel = JPanel(BorderLayout())
+    private val infoSubject: PublishSubject<String> = PublishSubject.create()
+    private val outputSubject: PublishSubject<String> = PublishSubject.create()
+    private val ipSubject: PublishSubject<String> = PublishSubject.create()
 
-        outputArea = JTextArea()
-        rootPanel.add(JBScrollPane(outputArea), BorderLayout.CENTER)
+    // --------------- Clearly separate between PublishSubject and Observable ---------------
 
-        val configPanelRight = JPanel()
-        configPanelRight.border = EmptyBorder(4, 4, 4, 4)
-        configPanelRight.layout = GridLayout(4, 2, 12, 12)
+    val outputObservable: Observable<String> = outputSubject
+    val infoObservable: Observable<String> = infoSubject
+    val ipObservable: Observable<String> = ipSubject
 
-        configPanelRight.add(JLabel("Port"))
-        textFieldPort = JTextField("5560", 10)
-        configPanelRight.add(textFieldPort)
-        configPanelRight.add(JLabel("Ip address"))
-        textFieldIp = JTextField("", 10)
-        configPanelRight.add(textFieldIp)
-        configPanelRight.add(JLabel(""))
-        configPanelRight.add(JLabel(""))
-        configPanelRight.add(JLabel("Android wear port"))
-        textFieldPortWear = JTextField("4446", 10)
-        configPanelRight.add(textFieldPortWear)
-
-        val configPanelLeft = JPanel()
-        configPanelLeft.layout = GridLayout(4, 2, 4, 4)
-        btnConnect = JButton("Connect", IconLoader.getIcon("/icons/ic_connect.png"))
-        configPanelLeft.add(btnConnect)
-        btnConnectWear = JButton("Connect wear", IconLoader.getIcon("/icons/tab_wear.png"))
-        configPanelLeft.add(btnConnectWear)
-        btnDisconnect = JButton("Disconnect", IconLoader.getIcon("/icons/ic_disconnect.png"))
-        configPanelLeft.add(btnDisconnect)
-        btnDiscoverIp = JButton("Discover device", IconLoader.getIcon("/icons/ic_discover.png"))
-        configPanelLeft.add(btnDiscoverIp)
-        btnRestartServer = JButton("Restart adb", IconLoader.getIcon("/icons/ic_restart.png"))
-        configPanelLeft.add(btnRestartServer)
-        btnSendToDevice = JButton("APK 2 device", IconLoader.getIcon("/icons/ic_send_push.png"))
-        configPanelLeft.add(btnSendToDevice)
-
-        btnDebugCert = JButton("Debug certificate", IconLoader.getIcon("/icons/ic_debug_certificate.png"))
-        configPanelLeft.add(btnDebugCert)
-
-        btnShockCert = JButton("Shockbytes certificate", IconLoader.getIcon("/icons/ic_shockbytes_cert.png"))
-        configPanelLeft.add(btnShockCert)
-
-        btnConnect.addActionListener(this)
-        btnDiscoverIp.addActionListener(this)
-        btnDisconnect.addActionListener(this)
-        btnConnectWear.addActionListener(this)
-        btnRestartServer.addActionListener(this)
-        btnSendToDevice.addActionListener(this)
-        btnDebugCert.addActionListener(this)
-        btnShockCert.addActionListener(this)
-
-        labelInfo = JLabel("")
-
-        rootPanel.add(configPanelRight, BorderLayout.EAST)
-        rootPanel.add(configPanelLeft, BorderLayout.WEST)
-        rootPanel.add(labelInfo, BorderLayout.SOUTH)
+    private val appsSyncer: AppsSyncService by lazy {
+        AppsSyncService(ProjectManager.getInstance().openProjects[0], pushService, gDriveOptions)
     }
 
-    override fun actionPerformed(e: ActionEvent) {
-        when {
-            e.source === btnDiscoverIp -> discoverDeviceIp()
-            e.source === btnConnect -> connect()
-            e.source === btnDisconnect -> disconnect()
-            e.source === btnConnectWear -> connectWearDevice()
-            e.source === btnRestartServer -> restartAdbServer()
-            e.source === btnSendToDevice -> sendApkToDevice()
-            e.source === btnDebugCert -> showDebugCertificateInformation()
-            e.source === btnShockCert -> showCustomCertificateInformation()
-        }
-    }
-
-    private fun discoverDeviceIp() {
+    fun discoverDeviceIp() {
         adbService.discoverDeviceIp().subscribe { (msg, deviceIp) ->
-            outputArea.append("\n$msg\n")
-            if (deviceIp != null) {
-                textFieldIp.text = deviceIp
-            }
+            outputSubject.onNext("\n$msg\n")
+            deviceIp?.let { ipSubject.onNext(it) }
         }
     }
 
-    private fun connect() {
-
-        val port = textFieldPort.text.toInt()
-        val deviceIp = textFieldIp.text
+    fun connect(deviceIp: String, port: Int) {
 
         adbService.connectToDevice(deviceIp, port).subscribe({ (processOutput, connectedDevice) ->
-            outputArea.append(processOutput)
-            outputArea.append("$connectedDevice\n")
+            outputSubject.onNext("$processOutput$connectedDevice\n")
             updateConnectionLabel(connectedDevice)
-        }, { outputArea.append("Error while connecting...\n") })
+        }, { outputSubject.onNext("Error while connecting...\n") })
     }
 
-    private fun connectWearDevice() {
-        textFieldPortWear.text.toIntOrNull()?.let { port ->
+    fun connectWearDevice(p: Int?) {
+        p?.let { port ->
             adbService.connectToWearable(port).subscribe { output ->
-                outputArea.append(output)
+                outputSubject.onNext(output)
             }
         }
     }
 
-    private fun disconnect() {
+    fun disconnect() {
         adbService.disconnect().subscribe { output ->
-            outputArea.append(output)
+            outputSubject.onNext(output)
         }
     }
 
-    private fun restartAdbServer() {
+    fun restartAdbServer() {
         adbService.restartAdbServer().subscribe { output ->
-            outputArea.append(output)
+            outputSubject.onNext(output)
         }
     }
 
@@ -171,30 +91,26 @@ class AndroidWorker : Worker(), ActionListener {
                 }
             } while (startIdx > -1)
 
-            labelInfo.text = "Connected device(s): $info"
+            infoSubject.onNext("Connected device(s): $info")
         }
     }
 
-    private fun sendApkToDevice() {
-        appsSyncer.tryCopyDebugAPK(outputArea).subscribe({
+    fun sendApkToDevice() {
+        appsSyncer.tryCopyDebugAPK().subscribe({
             // Do nothing here...
         }, { throwable ->
-            outputArea.append("Error while sending apk to device (" + throwable.message + ")...\n")
+            outputSubject.onNext("Error while sending apk to device (" + throwable.message + ")...\n")
         })
     }
 
-    private fun showDebugCertificateInformation() {
+    fun showDebugCertificateInformation() {
         certificateService.getDebugCertificate(ConfigManager.loadDebugCertificatePath())
-                .subscribe { certInfo ->
-                    outputArea.append(certInfo)
-                }
+                .subscribe { certInfo -> outputSubject.onNext(certInfo) }
     }
 
-    private fun showCustomCertificateInformation() {
-        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificate())
-                .subscribe { certInfo ->
-                    outputArea.append(certInfo)
-                }
+    fun showCustomCertificateInformation() {
+        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificates()[0]) // TODO Update UI to handle multiple certs
+                .subscribe { certInfo -> outputSubject.onNext(certInfo) }
     }
 
 }
