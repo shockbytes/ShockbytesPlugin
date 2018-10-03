@@ -20,7 +20,11 @@ class ShockbytesPluginWindow : ToolWindowFactory {
     private val platformManager: PlatformManager = PlatformManager.forPlatform(System.getProperty("os.name"))
 
     private val worker by lazy {
-        listOf(AndroidWorker(platformManager.adbService, platformManager.certificateService, platformManager.pushService),
+        listOf(
+                AndroidWorker(platformManager.adbService,
+                        platformManager.certificateService,
+                        platformManager.pushService,
+                        platformManager.googleDriveOptions),
                 WorkspaceCrawlerWorker(platformManager.workSpaceCrawler),
                 GradleWorker(),
                 ScreenCaptureWorker(platformManager.adbService),
@@ -30,17 +34,21 @@ class ShockbytesPluginWindow : ToolWindowFactory {
     private var tabbedPane: JBTabbedPane = JBTabbedPane()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        setupViews()
-        createTabs(toolWindow.component)
+        setupViews(toolWindow.component)
+        createTabs()
     }
 
-    private fun setupViews() {
+    private fun setupViews(container: Container) {
+
+        // Style the JBList
         UIManager.put("List.focusCellHighlightBorder", BorderFactory.createEmptyBorder())
+
+        // Add TabbedPane to the PluginWindow
+        container.add(tabbedPane)
     }
 
-    private fun createTabs(container: Container) {
-        worker.forEach { w -> tabbedPane.addTab(w.title, w.icon, w.tabPanel) }
-        container.add(tabbedPane)
+    private fun createTabs() {
+        worker.forEach { tabbedPane.addTab(it.title, it.icon, it.getView()) }
     }
 
 }

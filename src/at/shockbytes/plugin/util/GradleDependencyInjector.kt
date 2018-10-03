@@ -86,7 +86,7 @@ class GradleDependencyInjector(private val project: Project, rootFolder: String,
         }
     }
 
-    fun injectDaggerStatement() {
+    fun injectDaggerStatements() {
         injectDependencyStatements(daggerStatements)
         createDaggerFiles()
     }

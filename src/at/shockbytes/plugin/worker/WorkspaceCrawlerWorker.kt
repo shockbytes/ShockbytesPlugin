@@ -3,20 +3,18 @@ package at.shockbytes.plugin.worker
 import at.shockbytes.plugin.service.workspace.CrawlOptions
 import at.shockbytes.plugin.service.workspace.WorkspaceCrawler
 import at.shockbytes.plugin.util.IdeaProjectUtils
-import at.shockbytes.plugin.ui.MaterialListCellRenderer
+import at.shockbytes.plugin.view.WorkerView
+import at.shockbytes.plugin.view.WorkspaceCrawlerWorkerView
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.CollectionComboBoxModel
-import com.intellij.ui.components.JBList
-import com.intellij.ui.components.JBScrollPane
-import java.awt.BorderLayout
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
+import java.awt.Component
 import java.awt.Desktop
 import java.awt.GridLayout
 import java.awt.Point
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
 import java.io.IOException
@@ -24,7 +22,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import javax.swing.*
-import javax.swing.border.EmptyBorder
 
 
 /**
@@ -37,93 +34,30 @@ import javax.swing.border.EmptyBorder
  * .map { it.absolutePath }
  * .toList().toTypedArray()
  */
-class WorkspaceCrawlerWorker(private val crawler: WorkspaceCrawler) : Worker(), ActionListener {
-
-    private lateinit var textFieldInput: JTextField
-    private lateinit var cbExcludeBinaries: JCheckBox
-    private lateinit var cbExcludeProjectFiles: JCheckBox
-    private lateinit var cbExcludeGeneratedFiles: JCheckBox
-    private lateinit var labelStatus: JLabel
-    private lateinit var searchList: JBList<String>
+class WorkspaceCrawlerWorker(private val crawler: WorkspaceCrawler) : Worker<JPanel>() {
 
     override val title = "Workspace Crawler"
     override val icon = IconLoader.getIcon("/icons/tab_workspace_crawler.png")
+    override var view: WorkerView<JPanel> = WorkspaceCrawlerWorkerView(this)
 
-    override fun initializePanel() {
-        rootPanel = JPanel(BorderLayout())
+    private val crawlSubject: PublishSubject<Triple<Array<String>, String, Long>> = PublishSubject.create()
+    private val crawlErrorSubject: PublishSubject<Throwable> = PublishSubject.create()
 
-        val searchPanel = JPanel(GridLayout(5, 1, 2, 2))
-        searchPanel.border = EmptyBorder(8, 8, 8, 8)
+    // --------------- Clearly separate between PublishSubject and Observable ---------------
 
-        textFieldInput = JTextField("Search", 15)
-        textFieldInput.addActionListener(this)
-        searchPanel.add(textFieldInput)
-        cbExcludeBinaries = JCheckBox("Exclude Binaries", true)
-        searchPanel.add(cbExcludeBinaries)
-        cbExcludeProjectFiles = JCheckBox("Exclude project files", true)
-        searchPanel.add(cbExcludeProjectFiles)
-        cbExcludeGeneratedFiles = JCheckBox("Exclude generated files", true)
-        searchPanel.add(cbExcludeGeneratedFiles)
-        labelStatus = JLabel("Ready")
-        searchPanel.add(labelStatus)
+    val crawlObservable: Observable<Triple<Array<String>, String, Long>> = crawlSubject
+    val crawlErrorObservable: Observable<Throwable> = crawlErrorSubject
 
-        rootPanel.add(searchPanel, BorderLayout.WEST)
-
-        searchList = JBList()
-        searchList.setEmptyText("Ready")
-        searchList.cellRenderer = MaterialListCellRenderer()
-        searchList.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
-
-                var file = searchList.selectedValue
-                if (e?.clickCount == 2) {
-                    openFile(File(file))
-                } else if (SwingUtilities.isRightMouseButton(e)) {
-                    val idxSel = searchList.locationToIndex(e?.point)
-                    searchList.selectedIndex = idxSel
-                    file = searchList.selectedValue.toString()
-                    showPopup(e, file)
-                }
-            }
-        })
-        rootPanel.add(JBScrollPane(searchList), BorderLayout.CENTER)
-    }
-
-    override fun actionPerformed(e: ActionEvent) {
-
-        labelStatus.text = "Searching..."
-        searchList.setEmptyText("Searching...")
-        searchList.setPaintBusy(true)
-
-        var start = 0L
-        crawler.crawl(textFieldInput.text, CrawlOptions(cbExcludeBinaries.isSelected,
-                cbExcludeProjectFiles.isSelected, cbExcludeGeneratedFiles.isSelected))
-                .doOnSubscribe { start = System.currentTimeMillis() }
-                .subscribe({ (keyword, files) ->
-                    val duration = (System.currentTimeMillis() - start) / 1000L
-                    SwingUtilities.invokeLater {
-                        searchList.setListData(files)
-                        labelStatus.text = "${files.size} files found (in ${duration}s)"
-
-                        if (files.isEmpty()) {
-                            searchList.setEmptyText("Nothing found for <$keyword>")
-                        }
-                        searchList.setPaintBusy(false)
-                    }
-                }, { throwable ->
-                    searchList.setEmptyText("Error while crawling the workspace: ${throwable.localizedMessage}")
-                })
-    }
-
-    private fun copyIntoWorkspace(file: File, p: Point) {
+    private fun copyIntoWorkspace(file: File, point: Point) {
 
         val projects = ProjectManager.getInstance().openProjects
-        if (projects.isEmpty()) {
-            JOptionPane.showMessageDialog(rootPanel, "There is no open project!")
-            return
+        if (projects.isNotEmpty()) {
+            showCopyDialog(file, point,
+                    IdeaProjectUtils.getPackagesFromProject(projects[0]),
+                    IdeaProjectUtils.getSourceRootFolder(projects[0]))
+        } else {
+            JOptionPane.showMessageDialog(view.view, "There is no open project!")
         }
-        showCopyDialog(file, p, IdeaProjectUtils.getPackagesFromProject(projects[0]),
-                IdeaProjectUtils.getSourceRootFolder(projects[0]))
     }
 
     private fun showCopyDialog(f: File, p: Point, packages: List<String>, sourceRootPath: String?) {
@@ -162,7 +96,18 @@ class WorkspaceCrawlerWorker(private val crawler: WorkspaceCrawler) : Worker(), 
         dialog.isVisible = true
     }
 
-    private fun showPopup(e: MouseEvent?, filename: String) {
+    fun crawl(keyword: String, crawlOptions: CrawlOptions) {
+
+        var start = 0L
+        crawler.crawl(keyword, crawlOptions)
+                .doOnSubscribe { start = System.currentTimeMillis() }
+                .subscribe({ (keyword, files) ->
+                    val duration = (System.currentTimeMillis() - start) / 1000L
+                    crawlSubject.onNext(Triple(files, keyword, duration))
+                }, { throwable -> crawlErrorSubject.onNext(throwable) })
+    }
+
+    fun showPopup(component: Component, e: MouseEvent?, filename: String) {
 
         val menu = JPopupMenu()
         val itemOpen = JMenuItem("Open folder in explorer")
@@ -173,10 +118,11 @@ class WorkspaceCrawlerWorker(private val crawler: WorkspaceCrawler) : Worker(), 
         itemCopy.icon = IconLoader.getIcon("/icons/ic_copy.png")
         itemCopy.addActionListener { copyIntoWorkspace(File(filename), e?.locationOnScreen ?: Point(0, 0)) }
         menu.add(itemCopy)
-        menu.show(searchList, e?.point?.x ?: 0, e?.point?.y ?: 0)
+
+        menu.show(component, e?.point?.x ?: 0, e?.point?.y ?: 0)
     }
 
-    private fun openFile(f: File) {
+    fun openFile(f: File) {
         try {
             Desktop.getDesktop().open(f)
         } catch (e1: IOException) {

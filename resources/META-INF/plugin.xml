@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>at.shockbytes.plugin</id>
   <name>Shockbytes Plugin</name>
-  <version>3.0</version>
+  <version>4.0</version>
   <vendor email="shockbytesstudio@gmail.com" url="https://http://shockbytes.github.io/">Shockbytes Studio</vendor>
 
   <description><![CDATA[
@@ -9,7 +9,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Now fully written in Kotlin with reduced, but improved features
+      Complete separation of view and worker classes
     ]]>
   </change-notes>
 

@@ -11,7 +11,7 @@ import java.io.InputStreamReader
  * Author:  Martin Macheiner
  * Date:    16.03.2018
  */
-class WindowsAdbService : AdbService {
+class DefaultAdbService : AdbService {
 
     private var recordProcess: Process? = null
 

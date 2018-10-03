@@ -11,7 +11,7 @@ import at.shockbytes.plugin.util.ConfigManager
 
 class MacOsPlatformManager : PlatformManager {
 
-    override val adbService: AdbService = MacOsAdbService()
+    override val adbService: AdbService = DefaultAdbService()
 
     override val certificateService: CertificateService = KeyStoreBackedCertificateService()
 

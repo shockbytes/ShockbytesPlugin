@@ -3,7 +3,7 @@ package at.shockbytes.plugin.platform
 import at.shockbytes.plugin.service.android.AdbService
 import at.shockbytes.plugin.service.android.CertificateService
 import at.shockbytes.plugin.service.android.KeyStoreBackedCertificateService
-import at.shockbytes.plugin.service.android.WindowsAdbService
+import at.shockbytes.plugin.service.android.DefaultAdbService
 import at.shockbytes.plugin.service.push.GoogleDriveOptions
 import at.shockbytes.plugin.service.push.GooglePushService
 import at.shockbytes.plugin.service.push.PushService
@@ -14,7 +14,7 @@ import at.shockbytes.plugin.util.ConfigManager
 
 class WindowsPlatformManager : PlatformManager {
 
-    override val adbService: AdbService = WindowsAdbService()
+    override val adbService: AdbService = DefaultAdbService()
 
     override val certificateService: CertificateService = KeyStoreBackedCertificateService()
 

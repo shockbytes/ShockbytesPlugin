@@ -19,7 +19,6 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.InputStreamReader
 import java.util.*
-import javax.swing.JTextArea
 
 /**
  * Author:  Martin Macheiner
@@ -40,7 +39,7 @@ class AppsSyncService(private val project: Project,
         initializeAppsSyncState()
     }
 
-    fun tryCopyDebugAPK(outputArea: JTextArea): Completable {
+    fun tryCopyDebugAPK(): Completable {
         return Completable.fromAction {
             val f = File("$outputDirectory/app-debug.apk")
             if (!f.exists()) {
@@ -52,7 +51,7 @@ class AppsSyncService(private val project: Project,
                 throw IllegalStateException("No token stored in Google Drive file apps_fcm_token.txt!")
             }
 
-            copyToGoogleDrive(projectName, f.absolutePath, outputArea)
+            copyToGoogleDrive(projectName, f.absolutePath)
         }.subscribeOn(Schedulers.io())
     }
 
@@ -75,7 +74,7 @@ class AppsSyncService(private val project: Project,
         }
     }
 
-    private fun copyToGoogleDrive(name: String, inApk: String, outputArea: JTextArea) {
+    private fun copyToGoogleDrive(name: String, inApk: String) {
 
         val revision = revisionLookup(name)
         val outApkPath = "${googleDriveOptions.drivePathApps}${name}_$revision.apk"
@@ -87,8 +86,6 @@ class AppsSyncService(private val project: Project,
 
         val title = "$name ready to update"
         val body = "A new revision is available"
-
-        outputArea.append("$name Rev. $revision copied to destination folder\n")
 
         val t = Timer()
         t.schedule(object : TimerTask() {

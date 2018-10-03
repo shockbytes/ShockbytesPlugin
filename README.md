@@ -10,10 +10,10 @@ release.
 
 ## Versions
 
-### 3.2
+### 4.2
 - [ ] Supply/Fastlane support via PlayStoreWorker
 
-### 3.1
+### 4.1
 - [x] Store updated dependencies in gradle_dependencies.json
 - [x] Changer dagger generated classes to Kotlin
 - [ ] Resolve Google dependencies
