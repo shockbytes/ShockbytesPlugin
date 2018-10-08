@@ -10,16 +10,15 @@ release.
 
 ## Versions
 
-### 4.2
-- [ ] Supply/Fastlane support via PlayStoreWorker
-
 ### 4.1
-- [x] Store updated dependencies in gradle_dependencies.json
-- [x] Changer dagger generated classes to Kotlin
-- [ ] Resolve Google dependencies
 - [ ] Screengrab support
+- [ ] Supply/Fastlane support via PlayStoreWorker
 - [ ] Show current version somewhere
-- [ ] Use Dagger for dependency injection
+
+### 4.0
+* Store updated dependencies in gradle_dependencies.json
+* Changer dagger generated classes to Kotlin
+* Separate view from worker implementation
 
 ### 3.0
 * Android Utilities
