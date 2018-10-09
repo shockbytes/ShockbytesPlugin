@@ -15,7 +15,7 @@ import java.security.cert.Certificate
  */
 class KeyStoreBackedCertificateService : CertificateService {
 
-    private val separator = "----------------------------------------------------------------------\n"
+    private val separator = "-------------------------------------------------------------------------------------------------------${System.lineSeparator()}"
 
     override fun getDebugCertificate(keyStorePath: String): Single<String> {
         return grabCertificateInformation(keyStorePath, "androiddebugkey",
@@ -42,20 +42,20 @@ class KeyStoreBackedCertificateService : CertificateService {
 
                 val sb = StringBuffer()
                 sb.append(if (isDebug)
-                    "DEBUG CERTIFICATE FINGERPRINTS\nDebug certificate located at: "
+                    "DEBUG CERTIFICATE FINGERPRINTS${System.lineSeparator()}Debug certificate located at: "
                 else
                     "CUSTOM CERTIFICATE FINGERPRINTS\nCustom certificate located at: ")
                 sb.append(keyStorePath)
-                sb.append("\n\n")
-                sb.append("MD5:   \t${getCertFingerPrint("MD5", entry.certificate)}\n")
-                sb.append("SHA1:  \t${getCertFingerPrint("SHA1", entry.certificate)}\n")
-                sb.append("SHA256:\t${getCertFingerPrint("SHA-256", entry.certificate)}\n")
+                sb.append("${System.lineSeparator()}${System.lineSeparator()}")
+                sb.append("MD5:   \t${getCertFingerPrint("MD5", entry.certificate)}${System.lineSeparator()}")
+                sb.append("SHA1:  \t${getCertFingerPrint("SHA1", entry.certificate)}${System.lineSeparator()}")
+                sb.append("SHA256:\t${getCertFingerPrint("SHA-256", entry.certificate)}${System.lineSeparator()}")
                 sb.append(separator)
                 sb.toString()
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                "Cannot access debug KeyStore located at: $keyStorePath\n$separator"
+                "Cannot access debug KeyStore located at: $keyStorePath${System.lineSeparator()}$separator"
             }
         }.subscribeOn(Schedulers.io())
     }

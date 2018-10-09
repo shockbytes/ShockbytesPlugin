@@ -1,6 +1,8 @@
 package at.shockbytes.plugin.platform
 
 import at.shockbytes.plugin.service.android.*
+import at.shockbytes.plugin.service.process.DefaultProcessExecutionService
+import at.shockbytes.plugin.service.process.ProcessExecutionService
 import at.shockbytes.plugin.service.push.GoogleDriveOptions
 import at.shockbytes.plugin.service.push.GooglePushService
 import at.shockbytes.plugin.service.push.PushService
@@ -11,7 +13,9 @@ import at.shockbytes.plugin.util.ConfigManager
 
 class MacOsPlatformManager : PlatformManager {
 
-    override val adbService: AdbService = DefaultAdbService()
+    override val processExecutionService: ProcessExecutionService = DefaultProcessExecutionService()
+
+    override val adbService: AdbService = DefaultAdbService(processExecutionService)
 
     override val certificateService: CertificateService = KeyStoreBackedCertificateService()
 
@@ -20,7 +24,7 @@ class MacOsPlatformManager : PlatformManager {
     override val workSpaceCrawler: WorkspaceCrawler = DefaultWorkspaceCrawler(ConfigManager.loadWorkspaceLocation(), MacOsWorkspaceFileFilter())
 
     override val googleDriveOptions: GoogleDriveOptions = GoogleDriveOptions(
-            "/Users/martinmacheiner/Google Drive/apps/",
-            "Users/martinmacheiner/Google Drive/apps_fcm_token.txt")
+            "${System.getProperty("user.home")}/Google Drive/apps/",
+            "${System.getProperty("user.home")}/Google Drive/apps_fcm_token.txt")
 
 }

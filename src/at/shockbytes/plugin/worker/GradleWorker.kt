@@ -48,9 +48,9 @@ class GradleWorker : Worker<JPanel>() {
     }
 
     private fun initialize() {
-        val p = ProjectManager.getInstance().openProjects[0]
-        val rootFolder = IdeaProjectUtils.getProjectRootFolder(p) ?: throw IllegalStateException("Rootfolder must not be null!")
-        gradle = GradleDependencyInjector(p, rootFolder)
+        val rootFolder = IdeaProjectUtils.getOpenedProjectRootFolder()
+                ?: throw IllegalStateException("Root folder must not be null!") // <-- Should not happen
+        gradle = GradleDependencyInjector(IdeaProjectUtils.getOpenProject(), rootFolder)
 
         // Update the view
         displayableRepositoriesSubject.onNext(gradle.displayableRepositories)

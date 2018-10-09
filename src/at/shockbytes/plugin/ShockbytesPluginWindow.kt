@@ -28,7 +28,7 @@ class ShockbytesPluginWindow : ToolWindowFactory {
                 WorkspaceCrawlerWorker(platformManager.workSpaceCrawler),
                 GradleWorker(),
                 ScreenCaptureWorker(platformManager.adbService),
-                PlayStoreWorker())
+                PlayStoreWorker(platformManager.processExecutionService))
     }
 
     private var tabbedPane: JBTabbedPane = JBTabbedPane()

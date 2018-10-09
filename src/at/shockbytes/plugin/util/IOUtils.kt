@@ -27,8 +27,4 @@ object IOUtils {
         }
     }
 
-    @Throws(IOException::class)
-    fun readProcessOutput(p: Process?): String {
-        return BufferedReader(InputStreamReader(p?.inputStream)).lineSequence().joinToString("\n")
-    }
 }

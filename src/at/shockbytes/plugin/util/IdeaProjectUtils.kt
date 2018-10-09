@@ -1,6 +1,7 @@
 package at.shockbytes.plugin.util
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.StringUtils
@@ -14,7 +15,7 @@ import java.util.stream.Collectors
 
 /**
  * Author:  Martin Macheiner
- * Date:    03.08.2016.
+ * Date:    03.08.2016
  */
 object IdeaProjectUtils {
 
@@ -49,5 +50,8 @@ object IdeaProjectUtils {
         return project.basePath
     }
 
+    fun getOpenProject(): Project = ProjectManager.getInstance().openProjects[0]
+
+    fun getOpenedProjectRootFolder(): String? = getOpenProject().basePath
 
 }

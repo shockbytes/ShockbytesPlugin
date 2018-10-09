@@ -2,6 +2,7 @@ package at.shockbytes.plugin.platform
 
 import at.shockbytes.plugin.service.android.AdbService
 import at.shockbytes.plugin.service.android.CertificateService
+import at.shockbytes.plugin.service.process.ProcessExecutionService
 import at.shockbytes.plugin.service.push.GoogleDriveOptions
 import at.shockbytes.plugin.service.push.PushService
 import at.shockbytes.plugin.service.workspace.WorkspaceCrawler
@@ -9,6 +10,8 @@ import at.shockbytes.plugin.service.workspace.WorkspaceCrawler
 interface PlatformManager {
 
     val adbService: AdbService
+
+    val processExecutionService: ProcessExecutionService
 
     val certificateService: CertificateService
 
