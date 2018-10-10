@@ -69,16 +69,25 @@ object ConfigManager {
         }.subscribeOn(Schedulers.io())
     }
 
-
-    private fun loadFileContent(file: String): String {
-
-        val inStream: InputStream? = javaClass.getResourceAsStream(file)
-        return if (inStream != null) {
-            IOUtils.toString(inStream, "UTF-8")?.trim() ?: ""
-        } else ""
-    }
-
     fun loadDebugCertificatePath(): String {
         return System.getProperty("user.home") + "/.android/debug.keystore"
     }
+
+    fun getTemplateFile(filename: String): File {
+        return File(getTemplateFileAsString(filename))
+    }
+
+    fun getTemplateFileContent(filename: String): String = loadFileContent(getTemplateFileAsString(filename))
+
+    // -------------------------------------------------------------------------------------
+
+    private fun loadFileContent(file: String): String {
+        val inStream: InputStream? = javaClass.getResourceAsStream(file)
+        return if (inStream != null) { IOUtils.toString(inStream, "UTF-8")?.trim() ?: "" } else ""
+    }
+
+    private fun getTemplateFileAsString(filename: String): String {
+        return "/templates/$filename"
+    }
+
 }

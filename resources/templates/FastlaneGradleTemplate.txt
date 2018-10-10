@@ -1,0 +1,44 @@
+task fastlanePreparation(dependsOn: ['clean', 'assembleRelease']) {
+    group "Plugin for Fastlane Publish Preparation"
+    description "Automatically increments the version code after a successful release build"
+
+    doLast {
+
+        // TODO Create changelog files
+        def versionCode = getVersionCodeFromFile()
+        println("Create changelog for version $versionCode")
+
+        incrementVersionCode()
+        println("Fastlane preparation finished!")
+    }
+}
+
+void incrementVersionCode() {
+
+    File versionPropsFile = file('version.properties')
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        // Increment version
+        def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+        println "Version code incremented to $code"
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+int getVersionCodeFromFile() {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        return versionProps['VERSION_CODE'].toInteger()
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}

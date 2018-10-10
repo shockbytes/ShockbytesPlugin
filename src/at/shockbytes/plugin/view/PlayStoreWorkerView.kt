@@ -27,6 +27,7 @@ class PlayStoreWorkerView(private val playStoreWorker: PlayStoreWorker) : Worker
     private lateinit var btnUpdateNotes: JButton
     private lateinit var btnScreenshots: JButton
     private lateinit var btnVersioning: JButton
+    private lateinit var btnPrepareForRelease: JButton
 
     private lateinit var textArea: JTextArea
 
@@ -72,6 +73,11 @@ class PlayStoreWorkerView(private val playStoreWorker: PlayStoreWorker) : Worker
         btnVersioning = JButton("Manage versions", IconLoader.getIcon("/icons/ic_versions.png"))
         btnVersioning.addActionListener(this)
         releaseNotesPanel.add(btnVersioning)
+
+        btnPrepareForRelease = JButton("Prepare for release", IconLoader.getIcon("/icons/ic_prepare.png"))
+        btnPrepareForRelease.addActionListener(this)
+        releaseNotesPanel.add(btnPrepareForRelease)
+
 
         rootPanel.add(releaseNotesPanel, BorderLayout.EAST)
 
@@ -129,8 +135,9 @@ class PlayStoreWorkerView(private val playStoreWorker: PlayStoreWorker) : Worker
             btnPublishBeta -> playStoreWorker.publishBetaRelease()
             btnPublishRelease -> playStoreWorker.publishRelease()
             btnScreenshots -> playStoreWorker.manageScreenshots()
-            btnUpdateNotes -> playStoreWorker.manageUpdateNotes()
+            btnUpdateNotes -> playStoreWorker.manageReleaseNotes()
             btnVersioning -> playStoreWorker.manageVersions()
+            btnPrepareForRelease -> playStoreWorker.prepareForRelease()
         }
 
     }

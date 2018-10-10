@@ -1,0 +1,26 @@
+
+# Only builds the release apk
+lane :assembleBuild do
+  gradle(
+    task: 'assemble',
+    build_type: 'Release'
+  )
+end
+
+# Upload release apk to Play Store
+lane :playstore do
+  gradle(
+    task: 'assemble',
+    build_type: 'Release'
+  )
+  upload_to_play_store # Uploads the APK built in the gradle step above
+end
+
+# Upload to the beta track
+lane :beta do
+  gradle(
+    task: 'assemble',
+    build_type: 'Release'
+  )
+  upload_to_play_store(track: 'beta')
+end
