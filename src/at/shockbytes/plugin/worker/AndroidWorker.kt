@@ -109,7 +109,7 @@ class AndroidWorker(private val adbService: AdbService,
     }
 
     fun showCustomCertificateInformation() {
-        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificates()[0]) // TODO Update UI to handle multiple certs
+        certificateService.getCustomCertificate(ConfigManager.loadCustomCertificates()[1]) // TODO Update UI to handle multiple certs
                 .subscribe { certInfo -> outputSubject.onNext(certInfo) }
     }
 

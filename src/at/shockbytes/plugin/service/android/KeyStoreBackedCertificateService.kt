@@ -18,17 +18,17 @@ class KeyStoreBackedCertificateService : CertificateService {
     private val separator = "-------------------------------------------------------------------------------------------------------${System.lineSeparator()}"
 
     override fun getDebugCertificate(keyStorePath: String): Single<String> {
-        return grabCertificateInformation(keyStorePath, "androiddebugkey",
-                "android".toCharArray(), "android".toCharArray(), true)
+        return grabCertificateInformation("Debug", keyStorePath, "androiddebugkey",
+                "android".toCharArray(), "android".toCharArray())
     }
 
     override fun getCustomCertificate(certSigning: SigningCertificate): Single<String> {
-        return grabCertificateInformation(certSigning.keyStorePath, certSigning.alias,
-                certSigning.keyStorePassword, certSigning.entryPassword, false)
+        return grabCertificateInformation(certSigning.name, certSigning.keyStorePath, certSigning.alias,
+                certSigning.keyStorePassword, certSigning.entryPassword)
     }
 
-    private fun grabCertificateInformation(keyStorePath: String, alias: String, keyStorePassword: CharArray,
-                                           entryPassword: CharArray, isDebug: Boolean): Single<String> {
+    private fun grabCertificateInformation(keyStoreName: String, keyStorePath: String, alias: String,
+                                           keyStorePassword: CharArray, entryPassword: CharArray): Single<String> {
 
         return Single.fromCallable {
             try {
@@ -37,15 +37,10 @@ class KeyStoreBackedCertificateService : CertificateService {
                 val keystore = KeyStore.getInstance(KeyStore.getDefaultType())
                 keystore.load(inStream, keyStorePassword)
 
-                val entry = keystore.getEntry(alias,
-                        KeyStore.PasswordProtection(entryPassword)) as KeyStore.PrivateKeyEntry
+                val entry = keystore.getEntry(alias, KeyStore.PasswordProtection(entryPassword)) as KeyStore.PrivateKeyEntry
 
                 val sb = StringBuffer()
-                sb.append(if (isDebug)
-                    "DEBUG CERTIFICATE FINGERPRINTS${System.lineSeparator()}Debug certificate located at: "
-                else
-                    "CUSTOM CERTIFICATE FINGERPRINTS\nCustom certificate located at: ")
-                sb.append(keyStorePath)
+                sb.append("Fingerprints for $keyStoreName certificate located at:${System.lineSeparator()}$keyStorePath")
                 sb.append("${System.lineSeparator()}${System.lineSeparator()}")
                 sb.append("MD5:   \t${getCertFingerPrint("MD5", entry.certificate)}${System.lineSeparator()}")
                 sb.append("SHA1:  \t${getCertFingerPrint("SHA1", entry.certificate)}${System.lineSeparator()}")
